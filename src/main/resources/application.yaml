@@ -1,0 +1,313 @@
+#======================================================================================================================#
+# 自定義參數
+#======================================================================================================================#
+solaris:
+  #====================================================================================================================#
+  # 自定義：Server Connection Configuration
+  #====================================================================================================================#
+  server:
+    k8s:
+      http:
+        url: http://127.0.0.1:8081 #edgeCloud server
+        # url: http://192.168.50.130:8080  # benson desktop
+        # url: http://111.70.20.164:30380        
+        # url: http://60.251.156.216:31092
+        # url: http://60.251.156.211:6001
+    mec:
+      http:
+        # url: http://60.251.156.216:31088/nextems/api/v1
+        url: http://60.250.198.204:8080/nextems/api/v1
+    ric:
+      http:
+        # url: http://60.251.156.216:31088
+        url: http://127.0.0.1:8081
+    open-daylight:
+      http:
+        host: localhost
+        port: 8181
+        url: http://${server.open-daylight.http.host}:${server.open-daylight.http.port}
+        username: admin
+        password: admin
+      openflow:
+        vlan-match: true
+  #====================================================================================================================#
+  # 自定義：Security (JWT Token, Role Hierarchy)
+  #====================================================================================================================#
+  security:
+    jwt-token:
+      tokenHeader: Authorization      # 存放 Token 的 Header Key
+      tokenPrefixString: "Bearer "    # token 的前綴字串
+      authenticatedTokens:
+        ADMIN: eyJhbGciOiJIUzUxMiJ9.eyJ1c2VybmFtZSI6IlVTRVJfQURNSU4iLCJyb2xlIjoiUk9MRV9BRE1JTiIsImlhdCI6MTU1ODg4NjQwMCwiZXhwIjoxODc0MjQ2NDAwfQ.vbkgcdaGE61jJL-Jrf4hMAek4lDyGKtRkmDw0gjuvTvYEPK1rvfZiU0xn5pTYvlCrxPKBAnU2GTmo1EO0tIZiA 
+        Portal: eyJhbGciOiJIUzUxMiJ9.eyJ1c2VybmFtZSI6IlVTRVJfUG9ydGFsIiwicm9sZSI6IlJPTEVfUG9ydGFsIiwiaWF0IjoxNTU4ODg2NDAwLCJleHAiOjE4NzQyNDY0MDB9.5e2owZom8c_TKOcROzsn7WF78sSkhtHWGuWf87V8CLYPtyfhEs6q6XTaZEIUCTKLJmkaOZPk0sEMATQW_EVz6A
+        LogManager: eyJhbGciOiJIUzUxMiJ9.eyJ1c2VybmFtZSI6IlVTRVJfTG9nTWFuYWdlciIsInJvbGUiOiJST0xFX0xvZ01hbmFnZXIiLCJpYXQiOjE1NTg4ODY0MDAsImV4cCI6MTg3NDI0NjQwMH0.Jy9F6Qhj1O_Ebda0xA6s6Reehn_P0zmYGFRr0yO5VFts-rURHWBLgGn7c9ljon2impj250FDcn9Dhql8a470gQ
+    roleHierarchy:
+      ROLE_ADMIN: ROLE_Portal, ROLE_LogManager, ROLE_Tenant-Manager, ROLE_GUEST      
+      ROLE_Portal: ROLE_GUEST
+  #====================================================================================================================#
+  # 自定義：系統預設 Redis，支持 Event 功能，所有 tenant 共用，
+  #====================================================================================================================#  
+#  redis:
+#    host: 127.0.0.1
+#    port: 6379
+#    password: foobared123
+#    database: 2
+#    timeout: 2000          # 連線逾時時間，單位毫秒
+#    ssl: false             # 此參數不只用於預設 Redis，還用於表示整個平台所有的 Redis，因為現況 Redis 只有 1 台，考量不增加複雜度，用此表示整體 
+#    lettuce:
+#      pool:
+#        max-active: 500    # 連接池的最大連結數（使用負值表示沒有限制，默認值 8）
+#        max-idle: 200      # 連接池的最大閒置連結 （默認值 8） 
+#        min-idle: 50       # 連接池的最小閒置連結 （默認值 0）
+#        max-wait: 3000     # 當連結池已滿，在拋出異常前，最長的等待時間（使用負值表示沒有限制，默認值 -1）
+#======================================================================================================================#
+# Spring
+#======================================================================================================================#
+spring:
+  application:
+    name: Solaris Network Function Manager
+  profiles:
+    active: dev  
+  #====================================================================================================================#
+  # 匯入外部 yaml 檔案
+  #====================================================================================================================#  
+  config:
+    import: config/server.yaml, config/actuator.yaml
+  #====================================================================================================================#
+  # Data Source
+  #====================================================================================================================#  
+  datasource:    
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/edge_cloud
+    username: postgres
+    # password: Hello2020
+    #==================================================================================================================#
+    # Connection Pool - Hikari
+    #==================================================================================================================#  
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      minimum-idle: 1                         # 預設值 10，當 health check 時，在 connection-timeout 時間內，會一個接一個測試連線 
+      maximum-pool-size: 3                    # 預設值 10
+      auto-commit: true                       # 預設值 true
+      idle-timeout: 600000                    # 預設值 10 分
+      # pool-name: HikariPool-1               # 預設值 HikariPool-1
+      max-lifetime: 1800000                   # 預設值 30 分
+      connection-timeout: 10000               # 預設值 30 秒，此值決定  health check 的逾時時間，正式營運應該設為 30 秒
+      # connection-test-query: SELECT 1       # 如果驅動程式支援 JDBC4，不要設置這個屬性
+      validation-timeout: 5000                # 預設值 5 seconds
+  #====================================================================================================================#
+  # JPA 
+  #====================================================================================================================#  
+  jpa:
+    database: POSTGRESQL
+    show-sql: false
+    open-in-view: true  # 解決在 Spring MVC 與 JPA 之間 Session 的聲明週期問題
+    properties:
+      hibernate:
+        default_schema: backend
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        enable_lazy_load_no_trans: true
+        temp:
+          use_jdbc_metadata_defaults: false
+    # 讓 entity 的 column (駝峰式) 能夠正確對應資料庫的欄位名稱 (底線+小寫) 
+#    hibernate:
+#      naming:
+#        physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+  #====================================================================================================================#
+  # Flyway   
+  #====================================================================================================================#  
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    clean-on-validation-error: false
+    cleanDisabled: true
+    schemas:
+    - ${spring.jpa.properties.hibernate.default_schema}
+    default-schema: ${spring.jpa.properties.hibernate.default_schema}
+    create-schemas: true 
+  #====================================================================================================================#
+  # Cache   
+  #====================================================================================================================#  
+#  cache:    
+#    type: redis
+#    redis:
+#      time-to-live: 3600000     
+  #====================================================================================================================#
+  # MULTIPART (MultipartProperties) 
+  #====================================================================================================================#  
+  servlet:
+    multipart:
+      enabled: true                 # 是否允許上傳複數文件
+      file-size-threshold: 0B       # 文件寫入磁碟後的預設值。值可以使用後缀“MB”或“KB”
+      location:                     # 上傳文件的中间位置。
+      max-file-size: 15000MB        # 上傳檔案容量最大允許值，可用 MB 或者 KB 表示
+      max-request-size: 15002MB     # 請求容量最大允許值，可用 MB 或者 KB 表示
+      resolve-lazily: false         # 是否在文件或參數訪問時採用惰性處理多部分請求
+  #====================================================================================================================#
+  # Redis
+  #====================================================================================================================#  
+#  redis:
+#    host: 127.0.0.1       
+#    port: 6379             
+#    password: foobared123
+#    database: 5            # Redis 資料庫索引 0 ~ 15（預設值 0）     
+#    timeout: 2000          # 連線逾時時間，單位毫秒
+#    ssl: false
+#    lettuce:
+#      pool:                # Pool 使用 Apache commons-pool2 實做 
+#        max-active: 600    # 連接池的最大連結數（使用負值表示沒有限制，預設值 8）
+#        max-idle: 200      # 連接池的最大閒置連結 （預設值 8） 
+#        min-idle: 50       # 連接池的最小閒置連結 （預設值 0） 
+#        max-wait: 3000     # 當連結池已滿，在拋出異常前，最長的等待時間（使用負值表示沒有限制，預設值 -1）
+#    sentinel:
+#      master:
+#      nodes:       
+  #====================================================================================================================#
+  # RabbitMQ 
+  #====================================================================================================================#  
+  rabbitmq:   
+    host: 60.251.156.214
+    port: 32672                               # AMQP 加密 port 5671    MQTT port 1883
+    virtual-host: /                           # dev 是測試專用 vhost
+    username: admin 
+    connection-timeout: 1s          
+    publisher-returns: true                   # 開啟 return 確認機制
+    publisher-confirm-type: CORRELATED        # 開啟 confirm 確認機制
+    ssl:
+      enabled: false
+      algorithm: TLSv1.2
+      key-store: /rabbitmq-security/dev/inno-certs-p12/keycert.p12
+      key-store-password: tihm2k16
+      trust-store: /rabbitmq-security/dev/rabbitstore
+      trust-store-password: truststorepass 
+    listener:
+      simple:
+        acknowledge-mode: manual
+    template:
+      mandatory: true                         # 設定為 true 後 消費者在訊息沒有被路由到合適佇列情況下會被 return 監聽，而不會自動刪除
+      exchange: amq.topic            
+      routing-key: odl-to-nms     
+      durable-routing-key: odl-to-nms-durable # 額外增加的屬性     
+      reply-timeout: 10s
+      retry:
+        enabled: true
+        initial-interval: 1s
+        max-attempts: 3
+        max-interval: 3s
+        multiplier: 1
+  #====================================================================================================================#
+  # InfluxDB
+  #====================================================================================================================#
+  influx:
+    url: http://60.251.156.215:8086        # URL of the InfluxDB instance to which to connect.
+    database: lwm2m    
+    user: admin                            # Login user.
+    password: 1qaz@WSX                     # Login password.
+  #====================================================================================================================#
+  # Mail
+  #====================================================================================================================#
+  mail:
+    send-from: system@nfm
+    host: www.onmywebs.com
+    port: 587
+    username: service@onmywebs.com
+    # password: test
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  #====================================================================================================================#
+  # i18n   
+  #====================================================================================================================#  
+  messages:
+    basename: i18n/message
+    encoding: UTF-8
+    cache-duration: 3600
+  #====================================================================================================================#
+  # Output   
+  #====================================================================================================================#  
+  output.ansi.enabled: DETECT  # DETECT | ALWAYS
+  #====================================================================================================================#
+  # Pagination default 
+  #====================================================================================================================#  
+  data:
+    web:
+      pageable:
+        default-page-size: 100         # Default page size. (default: 20)
+        max-page-size: 500           # Maximum page size to be accepted. (default: 2000)
+        one-indexed-parameters: true # Whether to expose and assume 1-based page number indexes.
+        page-parameter: page         # Page index parameter name.
+        prefix:                      # General prefix to be prepended to the page number and page size parameters.
+        qualifier-delimiter: _       # Delimiter to be used between the qualifier and the actual page number and size properties.
+        size-parameter: size         # Page size parameter name.
+        sort:
+          sort-parameter: id         # Sort parameter name.  
+#======================================================================================================================#
+# Logging
+#======================================================================================================================#
+#debug: true  # 該屬性設定為 true 的時候，核心 Logger（包含嵌入式容器、hibernate、spring）會输出更多内容，但是你自己应用的日志并不会输出为 DEBUG 级别
+#trace: true
+logging:
+  pattern:
+    #console: "%clr(%d{yy-MM-dd E HH:mm:ss.SSS}){blue} %clr(%-5p) %clr(${PID}){faint} %clr(---){faint} %clr([%8.15t]){cyan} %clr(%-40.40logger{0}){blue} %clr(:){red} %clr(%m){faint}%n"
+    console: "%clr(%d{dd HH:mm:ss.SSS}){magenta} %clr(%-5level) %clr([%8.15thread]){cyan} %clr(%-120.120(%logger{100}.%method %line)){yellow} %n%clr(%m){faint}%n"
+  level:
+    root: DEBUG  # TRACE, DEBUG, INFO, WARN, ERROR, FATAL, OFF
+    solaris.nfm: DEBUG
+    solaris.nfm.Application: INFO
+
+    java.lang.Class: WARN
+    javax.activation: WARN
+    # mail
+    javax.mail: WARN
+    javax.management: WARN
+    javax.management.remote.rmi: WARN
+    javax.management.mbeanserver: WARN
+    jdk.event.security: WARN
+
+    _org.springframework.web.servlet.HandlerMapping.Mappings: WARN
+    org.springframework: WARN
+    org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver: WARN   
+    org.hibernate: WARN
+    org.apache.tomcat: WARN
+    org.apache.catalina: WARN
+    org.apache.coyote: WARN
+    org.apache.commons: WARN
+    org.postgresql: WARN
+    org.flywaydb.core: WARN
+    org.xnio: WARN  
+   
+    com.zaxxer.hikari: WARN
+    com.zaxxer.hikari.pool.ProxyConnection: WARN
+    # JsonPath
+    com.jayway.jsonpath.internal.path.CompiledPath: WARN
+    # RabbitMQ
+    com.rabbitmq.client: TRACE
+    # QueryDSL SQL 指令顯示
+    com.querydsl.jpa.impl.JPAQuery: WARN
+    # mail
+    com.sun.mail.smtp: WARN
+    sun.net.www.protocol: WARN
+    # RMI
+    sun.rmi: WARN
+    springfox.documentation: WARN
+    io.netty: WARN
+    io.lettuce.core: WARN
+    io.undertow: WARN
+    io.micrometer: WARN
+    reactor.core.publisher: WARN
+    reactor.util.Loggers: WARN
+  
+  ## path & file 都不設定的話，就不會產生日誌檔案。
+  #path:          # 配置日誌的路径。如果没有配置 logging.file, 將默認使用 spring.log 作为文件名
+  #file: log.txt  # 配置日誌输出的文件名，也可以配置文件名的絕對路徑，但此時不可設定 logging.file，避免衝突 
+  #file.max-size: 10 MB
+  #file.max-history: 5  
+# 出现错误时, 直接抛出异常(便于异常统一处理，否则捕获不到 404)
+  mvc:
+    throw-exception-if-no-handler-found: true
+# 不要为我们工程中的资源文件建立映射
+  resources:
+    add-mappings: false

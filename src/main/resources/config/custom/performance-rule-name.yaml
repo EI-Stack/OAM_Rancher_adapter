@@ -1,0 +1,33 @@
+performance-rule-name:
+  name-list: 
+    fgc:
+      - pps-n3-ul
+      - pps-n3-dl
+      - pps-n6-ul
+      - pps-n6-dl
+      - throughput-n3-ul
+      - throughput-n3-dl
+      - throughput-n6-ul
+      - throughput-n6-dl    
+    mec:
+      - throughput-n3-ul
+      - throughput-n3-dl
+      - throughput-n6-ul
+      - throughput-n6-dl    
+      - throughput-n9-ul
+      - throughput-n9-dl    
+    ric:
+      - accessibility-drbAccessibility5qi
+      - accessibility-rrcConnSetupSR
+      - retainability-drbRetain5qi
+      - mobility-granHoSR
+      - energySaving-eeMnDv
+      - utilization-pduSesMeanNbr
+      - utilization-vruProcessor
+      - utilization-vruMemory
+      - utilization-vruDisk
+      - utilization-pduSesMaxNbr
+      - integrity-dlDelayNrSNw
+      - integrity-ulDelayNrSNw
+      - integrity-dlUeTputSNw
+      - integrity-ulUeTputSNw

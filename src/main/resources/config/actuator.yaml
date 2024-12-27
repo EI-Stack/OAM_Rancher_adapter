@@ -1,0 +1,37 @@
+#======================================================================================================================#
+# Actuator
+#======================================================================================================================#
+management:
+  server:    
+    #port: # 留空，表示使用原本的 port，也意味著，management.servlet.context-path 設定無效
+    ssl:
+      enabled: false    
+    base-path: # 留空等同 server.servlet.context-path，注意！ 只有同時設置了 management.server.port 時，設定值才會有效
+  endpoints:
+    web:
+      # Actuator 預設所有的監控點路徑都在 /actuator/*
+      # base-path: /po
+      exposure:
+        # 大多數 actuator 的端口都不會通過 http 公開，* 代表公開所有這些端点。对於營運環境，應該仔细選擇要公開的端點。
+        include: health, info
+  metrics:
+    tags:
+      application: ${spring.application.name}        
+  endpoint:
+    shutdown.enabled: false  # 遠端關機，正式營運須關閉此功能
+    health: 
+      show-details: ALWAYS  # 預設值是 never， ALWAYS | NEVER | WHEN_AUTHORIZED
+  health:
+    defaults.enabled: true
+    mail.enabled: false
+  info:                                                 
+    build.enabled: true
+    defaults.enabled: true
+    env.enabled: true
+    git.enabled: true    
+  #====================================================================================================================#
+  # Actuator - 配置自定義系統訊息，使用 /actuator/info 方式讀取
+  #====================================================================================================================#
+    app:
+      name: Edge Cloud Backend
+      version: 2.3.31.3

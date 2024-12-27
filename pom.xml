@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>org.iii</groupId>
+	<artifactId>solaris-network-function-manager</artifactId>
+	<version>1.0.0</version>
+	<packaging>jar</packaging>
+
+	<name>solaris-nfm</name>
+	<description>Solaris Network Function Manager</description>
+
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.7.2</version>
+		<relativePath /> <!-- lookup parent from repository -->
+	</parent>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<!-- 預設值是 1.8，即使 Eclipse 設定為 11，編譯出來的版本仍然為 1.8 -->
+		<!-- 注意囉，當執行 maven, update project 指令時，會依據此值，自動改變 Eclipse 的設定值，例如 JRE, Java build path 等 -->
+		<java.version>17</java.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-aop</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+			<!-- 移除掉預設的 Tomcat -->
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-tomcat</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<!-- 添加 Undertow 容器 -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-undertow</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<!-- ====================================================================================================== -->
+		<!-- Redis (Spring Boot2.x 之後，底層實做不再是 Jedis，而是改用 Lettuce, 而且需要 commons-pool2) -->
+		<!-- ====================================================================================================== -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-pool2</artifactId>
+		</dependency>
+		<!-- ====================================================================================================== -->
+		<!-- WebSocket -->
+		<!-- ====================================================================================================== -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-websocket</artifactId>
+		</dependency>
+		<!-- ====================================================================================================== -->
+		<!-- 能夠處理 AMQP/MQTT -->
+		<!-- ====================================================================================================== -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-amqp</artifactId>
+		</dependency>
+		<!-- ====================================================================================================== -->
+		<!-- Actuator 顯示本身的資訊，用於監控與管理 -->
+		<!-- ====================================================================================================== -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>		
+		</dependency>
+		<!-- ====================================================================================================== -->
+		<!-- Spring DevTools -->
+		<!-- ====================================================================================================== -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<scope>runtime</scope>
+			<optional>true</optional>
+		</dependency>
+		<!-- ====================================================================================================== -->
+		<!-- Spring Boot 自動產生配置元數據文件 -->
+		<!-- 在 IDEA 和 STS 中會有屬性提示，此依赖只會在編譯時期調用 -->
+		<!-- ====================================================================================================== -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-configuration-processor</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<!-- ====================================================================================================== -->
+		<!-- Spring Test -->
+		<!-- ====================================================================================================== -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- ====================================================================================================== -->
+		<!-- Lombok -->
+		<!-- ====================================================================================================== -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<!-- ====================================================================================================== -->
+		<!-- PostgreSQL JDBC Driver -->
+		<!-- ====================================================================================================== -->
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<!-- To build a war file that is both executable and deployable into an
+			external container, you need to mark the embedded container dependencies
+			as "provided" -->
+		<!-- 編譯成 war 檔才需要，但編譯成 jar 時也不會編入增加檔案容量 -->
+		<!-- <dependency> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot-starter-tomcat</artifactId>
+			<scope>provided</scope> </dependency> -->
+		<!-- ====================================================================================================== -->
+		<!-- QueryDSL -->
+		<!-- ====================================================================================================== -->
+		<dependency>
+			<groupId>com.querydsl</groupId>
+			<artifactId>querydsl-jpa</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.querydsl</groupId>
+			<artifactId>querydsl-apt</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<!-- ====================================================================================================== -->
+		<!-- Flyway -->
+		<!-- ====================================================================================================== -->
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+		</dependency>
+		<!-- ====================================================================================================== -->
+		<!-- 完成資料對應。讓 PostgreSQL jsonb 能夠直接對應 Java JsonNode -->
+		<!-- ====================================================================================================== -->
+		<dependency>
+			<groupId>com.vladmihalcea</groupId>
+			<artifactId>hibernate-types-52</artifactId>
+			<version>2.12.1</version> <!-- 2.10.4 -->
+		</dependency>
+		<!-- ====================================================================================================== -->
+		<!-- JWT (JSON Web Token) Support For The JVM [JSON Web Token Support For The JVM] -->
+		<!-- ====================================================================================================== -->
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt</artifactId>
+			<version>0.9.1</version>
+		</dependency>
+		<!-- ====================================================================================================== -->
+		<!-- Json Path - 使用類似 xpath 的方式來解析 json -->
+		<!-- ====================================================================================================== -->
+		<dependency>
+			<groupId>com.jayway.jsonpath</groupId>
+			<artifactId>json-path</artifactId>
+		</dependency>
+		<!-- ====================================================================================================== -->
+		<!-- Apache Commons Text -->
+		<!-- ====================================================================================================== -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-text</artifactId>
+			<version>1.9</version>
+		</dependency>
+		<!-- ====================================================================================================== -->
+		<!-- 在此之後，都尚未驗證 -->
+		<!-- ====================================================================================================== -->
+		<!-- ====================================================================================================== -->
+		<!-- Spring Cache 搭套 caffeine                                                                             -->
+		<!-- ====================================================================================================== -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-cache</artifactId>
+		</dependency>
+		<dependency>
+        	<groupId>com.github.ben-manes.caffeine</groupId>
+        	<artifactId>caffeine</artifactId>
+		</dependency>
+		<!-- ====================================================================================================== -->
+		<!-- InfuxDB -->
+		<!-- ====================================================================================================== -->
+		<dependency>
+			<groupId>org.influxdb</groupId>
+			<artifactId>influxdb-java</artifactId>
+		</dependency>
+
+        <!--Mail-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>commons-fileupload</groupId>
+			<artifactId>commons-fileupload</artifactId>
+			<version>1.4</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>com.google.code.findbugs</groupId>
+		    <artifactId>annotations</artifactId>
+		    <version>3.0.1</version>
+		    <scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.findbugs</groupId>
+			<artifactId>jsr305</artifactId>
+			<version>3.0.1</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>31.1-jre</version>
+        </dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<fork>true</fork>
+					<addResources>true</addResources>
+					<jvmArguments>-Dfile.encoding=UTF8 -Dspring.profiles.active=dev</jvmArguments>
+					<!--					<jvmArguments>-->
+					<!--						-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005-->
+					<!--					</jvmArguments>-->
+				</configuration>
+			</plugin>
+			<!-- for create Querydsl QEntity -->
+			<plugin>
+				<groupId>com.mysema.maven</groupId>
+				<artifactId>apt-maven-plugin</artifactId>
+				<version>1.1.3</version>
+				<executions>
+					<execution>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>process</goal>
+						</goals>
+						<configuration>
+							<!-- Specifies the directory in which the query types are generated -->
+							<outputDirectory>.apt_generated</outputDirectory>
+							<!-- States that the APT code generator should look for JPA annotations -->
+							<processor>com.querydsl.apt.jpa.JPAAnnotationProcessor</processor>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>3.7.0.1746</version>
+            </plugin>
+            <plugin>
+          		<groupId>org.jacoco</groupId>
+          		<artifactId>jacoco-maven-plugin</artifactId>
+          		<version>0.8.6</version>
+        	</plugin>
+		</plugins>
+	</build>
+</project>

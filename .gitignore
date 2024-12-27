@@ -1,0 +1,13 @@
+.idea/
+*.iml
+*.class
+target/
+bin/
+.apt_generated/
+META-INF/
+
+.classpath
+.project
+.settings
+desktop.ini
+src/main/resources/application-dev.yaml
