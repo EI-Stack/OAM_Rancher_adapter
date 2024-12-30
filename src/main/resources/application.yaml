@@ -6,6 +6,10 @@ solaris:
   # 自定義：Server Connection Configuration
   #====================================================================================================================#
   server:
+    rancher:
+      http:
+        url: https://rancher.125.227.249.152.nip.io
+        token: token-btqqx:f5wwqmfv2s4ccqv5sm7t6cn9b4mzhr6v4kt7jks2mcnndczjn7s2s5
     adapter:
       core:
         http:

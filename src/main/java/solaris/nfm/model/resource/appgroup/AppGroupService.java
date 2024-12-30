@@ -49,9 +49,9 @@ public class AppGroupService extends RestServiceBase
 	@Autowired
 	private ObjectMapper objectmapper;
 	
-	public AppGroupService(final RestTemplateBuilder restTemplateBuilder, final SslBundles sslBundles, final RestTemplate restTemplate, @Value("${solaris.server.adapter.core.http.url}") String url,
+	public AppGroupService(final RestTemplateBuilder restTemplateBuilder, final SslBundles sslBundles, final RestTemplate restTemplate, @Value("${solaris.server.rancher.http.url}") String url,
 			@Value("${solaris.server.adapter.core.ssl.enabled:false}") Boolean sslEnabled, @Value("${solaris.server.adapter.core.ssl.bundle:}") String sslBundleName,
-			@Value("${solaris.server.adapter.core.http.token:}") String token) 
+			@Value("${solaris.server.rancher.http.token:}") String token) 
 	{
 		super.initService(restTemplateBuilder, sslBundles, restTemplate, url, token, sslEnabled, sslBundleName);
 	}
@@ -65,6 +65,10 @@ public class AppGroupService extends RestServiceBase
 //		super.httpHeaders = httpHeaders;
 //
 //		super.networkUrl = this.url;
+	}
+	
+	public String getRancherVersion() throws ExceptionBase {
+		return doMethodGetString("/rancherversion");
 	}
 
 //	public String createAppGroup(final AppGroupDto dto) throws UnsupportedEncodingException, ExceptionBase

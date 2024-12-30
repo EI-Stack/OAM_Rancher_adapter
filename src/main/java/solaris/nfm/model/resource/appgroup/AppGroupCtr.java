@@ -52,6 +52,13 @@ public class AppGroupCtr extends ControllerBase<AppGroup, AppGroupVo, AppGroup, 
 	@Autowired
 	private AppGroupService		service;
 	
+	@GetMapping(value = "/version")
+	@ResponseStatus(HttpStatus.OK)
+	public String fetchRancherVersion() throws Exception
+	{
+		return service.getRancherVersion();
+	}
+	
 //	@GetMapping(value = "/appGroups/{id}")
 //	@ResponseStatus(HttpStatus.OK)
 //	public AppGroupVo fetchAppGroup(@PathVariable("id") final Long id) throws Exception

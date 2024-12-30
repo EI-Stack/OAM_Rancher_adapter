@@ -29,6 +29,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import solaris.nfm.exception.base.ExceptionBase;
+import solaris.nfm.util.SslUtils;
 
 @Slf4j
 public class RestServiceBase
@@ -68,13 +69,14 @@ public class RestServiceBase
 		}
 		setRestTemplate(specificRestTemplate);
 		// Configure URL
-		if (Boolean.TRUE.equals(sslEnabled))
-		{
-			setNetworkUrl("https://" + url);
-		} else
-		{
-			setNetworkUrl("http://" + url);
-		}
+//		if (Boolean.TRUE.equals(sslEnabled))
+//		{
+//			setNetworkUrl("https://" + url);
+//		} else
+//		{
+//			setNetworkUrl("http://" + url);
+//		}
+		setNetworkUrl(url);
 
 		final HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
@@ -169,6 +171,7 @@ public class RestServiceBase
 		{
 			log.debug("\t [REST] GET URL=[{}]", url);
 		}
+		SslUtils.ignoreSsl();
 		final HttpEntity<JsonNode> requestEntity = new HttpEntity<>(this.httpHeaders);
 		ResponseEntity<T> response = null;
 		response = this.restTemplate.exchange(url, HttpMethod.GET, requestEntity, responseType);
@@ -291,6 +294,7 @@ public class RestServiceBase
 		{
 			log.debug("\t [REST] POST URL=[{}]", url);
 		}
+		SslUtils.ignoreSsl();
 		final HttpEntity<JsonNode> requestEntity = new HttpEntity<>(json, this.httpHeaders);
 		final ResponseEntity<T> response = this.restTemplate.exchange(url, HttpMethod.POST, requestEntity, responseType);
 		if (logEnabled)
@@ -312,6 +316,7 @@ public class RestServiceBase
 		{
 			log.debug("\t [REST] POST URL=[{}]", url);
 		}
+		SslUtils.ignoreSsl();
 		final HttpEntity<String> requestEntity = new HttpEntity<>(body, this.httpHeaders);
 		final ResponseEntity<T> response = this.restTemplate.exchange(url, HttpMethod.POST, requestEntity, responseType);
 		if (logEnabled)
@@ -381,6 +386,7 @@ public class RestServiceBase
 		{
 			log.debug("\t [REST] PUT URL=[{}]", url);
 		}
+		SslUtils.ignoreSsl();
 		final HttpEntity<JsonNode> requestEntity = new HttpEntity<>(requestJson, this.httpHeaders);
 		final ResponseEntity<T> response = this.restTemplate.exchange(url, HttpMethod.PUT, requestEntity, responseType);
 		if (logEnabled)
@@ -448,6 +454,7 @@ public class RestServiceBase
 		{
 			log.debug("\t [REST] DELETE URL=[{}]", url);
 		}
+		SslUtils.ignoreSsl();
 		final HttpEntity<JsonNode> requestEntity = new HttpEntity<>(this.httpHeaders);
 		final ResponseEntity<T> response = this.restTemplate.exchange(url, HttpMethod.DELETE, requestEntity, responseType);
 		if (logEnabled)
@@ -517,6 +524,7 @@ public class RestServiceBase
 		{
 			log.debug("\t [REST] PATCH URL=[{}]", url);
 		}
+		SslUtils.ignoreSsl();
 		final HttpEntity<JsonNode> requestEntity = new HttpEntity<>(requestJson, this.httpHeaders);
 		ResponseEntity<T> response = null;
 		response = this.restTemplate.exchange(url, HttpMethod.PATCH, requestEntity, responseType);
