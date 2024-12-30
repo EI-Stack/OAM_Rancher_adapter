@@ -14,22 +14,25 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class JwtUser implements UserDetails
 {
 	private static final long								serialVersionUID	= 1L;
-	private final Long										id;           // 必须
-	private final String									username;     // 必须
-	private final String									password;     // 必须
-	private final boolean									enabled;      // 必须 //表示當前这个使用者是否可以使用
+	private final Long										id;           // 必須
+	private final String									username;     // 必須
+	private final String									pwpwpwpw;     // 必須
+	private final boolean									enabled;      // 必須 //表示當前這個使用者是否可以使用
 	private final LocalDateTime								loginTime;
+	private final String									userIp;
 	// 授權的角色集合---不是用户的角色集合
 	// 權限的類型要繼承 GrantedAuthority
-	private final Collection<? extends GrantedAuthority>	authorities;       // 必须
+	private final Collection<? extends GrantedAuthority>	authorities;       // 必須
 
-	public JwtUser(final Long id, final String username, final String password, final boolean enabled, final LocalDateTime loginTime, final Collection<? extends GrantedAuthority> authorities)
+	public JwtUser(final Long id, final String username, final String pwpwpwpw, final boolean enabled, final LocalDateTime loginTime, final String userIp,
+			final Collection<? extends GrantedAuthority> authorities)
 	{
 		this.id = id;
 		this.username = username;
-		this.password = password;
+		this.pwpwpwpw = pwpwpwpw;
 		this.enabled = enabled;
 		this.loginTime = loginTime;
+		this.userIp = userIp;
 		this.authorities = authorities;
 	}
 
@@ -43,7 +46,7 @@ public class JwtUser implements UserDetails
 	@Override
 	public String getPassword()
 	{
-		return this.password;
+		return this.pwpwpwpw;
 	}
 
 	@Override
@@ -89,5 +92,10 @@ public class JwtUser implements UserDetails
 	public LocalDateTime getLoginTime()
 	{
 		return loginTime;
+	}
+
+	public String getUserIp()
+	{
+		return userIp;
 	}
 }

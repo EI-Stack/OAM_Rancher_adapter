@@ -1,28 +1,24 @@
 package solaris.nfm.config;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
 
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 import org.springframework.security.web.authentication.session.ConcurrentSessionControlAuthenticationStrategy;
 import org.springframework.security.web.session.ConcurrentSessionFilter;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -45,6 +41,7 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
+import com.google.common.collect.ImmutableList;
 
 import lombok.extern.slf4j.Slf4j;
 import solaris.nfm.config.security.filter.JwtTokenAuthenticationFilter;
@@ -55,8 +52,7 @@ import solaris.nfm.config.security.filter.JwtTokenAuthenticationFilter;
 @Slf4j
 @Configuration
 @EnableAutoConfiguration
-@ComponentScan(basePackages =
-{"web"})
+@ComponentScan(basePackages = {"web"})
 @EnableScheduling
 // @import 注解允许從另一個配置 XML 檔案中匯入 @Bean 的定義。
 // @Import({ DbConfig.class })
@@ -74,8 +70,8 @@ public class AppConfig
 		// final String[] originArray = {"http://192.168.0.179:8080", "http://192.168.0.179:3000"};
 		configuration.addAllowedOriginPattern("*");
 		// configuration.setAllowedOrigins(Arrays.asList("http://192.168.0.179:8080"));
-		configuration.setAllowedMethods(List.of("HEAD", "GET", "POST", "PUT", "DELETE", "PATCH"));
-		configuration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
+		configuration.setAllowedMethods(ImmutableList.of("HEAD", "GET", "POST", "PUT", "DELETE", "PATCH"));
+		configuration.setAllowedHeaders(ImmutableList.of("Authorization", "Cache-Control", "Content-Type"));
 		configuration.setAllowCredentials(true);
 		final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration);  // 非常關鍵的 1 個地方，不能設成 /RESTful/** ，否則會攔截不到
@@ -125,8 +121,9 @@ public class AppConfig
 	public PasswordEncoder passwordEncoder()
 	{
 		// return new BCryptPasswordEncoder();
-		return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+		// return PasswordEncoderFactories.createDelegatingPasswordEncoder();
 		// return new ShaPasswordEncoder(256);
+		return Pbkdf2PasswordEncoder.defaultsForSpringSecurity_v5_5();
 	}
 
 	// ----------------------------------------------------------------------------------------------------------------
@@ -147,13 +144,13 @@ public class AppConfig
 		return executor;
 	}
 
-	@Bean
-	public RestTemplate restTemplate()
-	{
-		final RestTemplate restTemplate = new RestTemplate();
-		restTemplate.getMessageConverters().add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
-		return restTemplate;
-	}
+	// @Bean
+	// public RestTemplate restTemplate()
+	// {
+	// final RestTemplate restTemplate = new RestTemplate();
+	// restTemplate.getMessageConverters().add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
+	// return restTemplate;
+	// }
 
 	// ================================================================================================================
 	// Jackson 使用以下序列化程序將 Json 時間字串 (2018-12-12 10:10:10) 轉成 LocalDate 類型。
@@ -202,26 +199,4 @@ public class AppConfig
 			});
 		}
 	}
-
-	/**
-	 * 会自动注册使用了 @ServerEndpoint 注解声明的 Websocket endpoint
-	 * 要注意，如果使用独立的servlet容器，而不是直接使用 springboot 的内置容器，
-	 * 就不要注入 ServerEndpointExporter，因为它将由容器自己提供和管理。
-	 */
-	// @Bean
-	// public ServerEndpointExporter serverEndpointExporter()
-	// {
-	// // log.info("\t[Boot] WebSocket server 啟動完成");
-	// return new ServerEndpointExporter();
-	// }
-
-	// @Bean("dynamicRoutingDataSource")
-	// public DynamicRoutingDataSource dynamicRoutingDataSource(@Value("${solaris.default-tenant.psqlConfig.driver-class-name}") final String driverClassName,
-	// @Value("${solaris.default-tenant.psqlConfig.url}") final String jdbcUrl, @Value("${solaris.default-tenant.psqlConfig.username}") final String username,
-	// @Value("${solaris.default-tenant.psqlConfig.password}") final String password)
-	// {
-	// log.debug("\t[Boot] [DDS] 初始化動態 data source");
-	// final DynamicRoutingDataSource dataSource = new DynamicRoutingDataSource();
-	// return dataSource;
-	// }
 }

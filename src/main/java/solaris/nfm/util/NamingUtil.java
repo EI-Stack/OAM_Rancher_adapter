@@ -48,21 +48,24 @@ public class NamingUtil {
         ObjectNode objectNode = (ObjectNode) input;
         Iterator<String> fieldNames = objectNode.fieldNames();
         List<String> fieldNameList = new ArrayList<>();
-        while (fieldNames.hasNext()) {
-            String fieldName = fieldNames.next();
-            fieldNameList.add(fieldName);
-        }
-        for (String fieldName : fieldNameList) {
-            JsonNode value = objectNode.get(fieldName);
-            if (value.isArray() || value.isObject()) {
-                removeNamespaceInKey(value);
+        if (fieldNames != null){
+            while (fieldNames.hasNext()) {
+                String fieldName = fieldNames.next();
+                fieldNameList.add(fieldName);
             }
-            if (fieldName.contains(":")) {
-                String[] split = fieldName.split(":");
-                objectNode.set(split[1], value);
-                objectNode.remove(fieldName);
+            for (String fieldName : fieldNameList) {
+                JsonNode value = objectNode.get(fieldName);
+                if (value.isArray() || value.isObject()) {
+                    removeNamespaceInKey(value);
+                }
+                if (fieldName.contains(":")) {
+                    String[] split = fieldName.split(":");
+                    objectNode.set(split[1], value);
+                    objectNode.remove(fieldName);
+                }
             }
         }
+
         return objectNode;
     }
 }

@@ -2,8 +2,6 @@ package solaris.nfm.controller;
 
 import java.util.Objects;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -12,20 +10,17 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import solaris.nfm.capability.message.amqp.AmqpService;
 import solaris.nfm.capability.system.aop.dto.LogBaseDto;
 import solaris.nfm.config.security.domain.AuthenticationException;
-import solaris.nfm.config.security.domain.JwtAuthenticationRequest;
 import solaris.nfm.config.security.domain.JwtAuthenticationResponse;
 import solaris.nfm.config.security.domain.JwtUser;
 import solaris.nfm.config.security.util.JwtTokenUtil;
@@ -42,7 +37,7 @@ public class TokenCtr
 	// @Value("${jwt.header}")
 	private String					tokenHeader	= "Bearer ";
 	// WebSecurityConfig类里面配置的，用来校验用户名和密码的
-	@Autowired
+	// @Autowired
 	private AuthenticationManager	authenticationManager;
 	@Autowired
 	private JwtTokenUtil			jwtTokenUtil;
@@ -75,23 +70,23 @@ public class TokenCtr
 	 * @return
 	 * @throws AuthenticationException
 	 */
-	@PostMapping(value = "/getToken")  // 用户登录的用户名和密码已经封装到 JwtAuthenticationRequest 里面了
-	public ResponseEntity<JwtAuthenticationResponse> createAuthenticationToken(@RequestBody final JwtAuthenticationRequest authenticationRequest) throws AuthenticationException
-	{
-		log.debug("\t [JWT] 進入取得 token 程序");
-		final String username = authenticationRequest.getUsername().trim();
-		final String password = authenticationRequest.getPassword().trim();
-		// authenticate 校验用户名和密码（本类下面）
-		authenticate(username, password);
-		// 校验通过后
-		// Reload password post-security so we can generate the token
-		// 按用户名查用户
-		final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-		// 然后传入用户生成 token
-		final String token = jwtTokenUtil.generateToken(userDetails);
-		// 把 token 封装到 JwtAuthenticationResponse 里面返回
-		return ResponseEntity.ok(new JwtAuthenticationResponse(token));
-	}
+	// @PostMapping(value = "/getToken") // 用户登录的用户名和密码已经封装到 JwtAuthenticationRequest 里面了
+	// public ResponseEntity<JwtAuthenticationResponse> createAuthenticationToken(@RequestBody final JwtAuthenticationRequest authenticationRequest) throws AuthenticationException
+	// {
+	// log.debug("\t [JWT] 進入取得 token 程序");
+	// final String username = authenticationRequest.getUsername().trim();
+	// final String password = authenticationRequest.getPassword().trim();
+	// // authenticate 校验用户名和密码（本类下面）
+	// authenticate(username, password);
+	// // 校验通过后
+	// // Reload password post-security so we can generate the token
+	// // 按用户名查用户
+	// final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+	// // 然后传入用户生成 token
+	// final String token = jwtTokenUtil.generateToken(userDetails);
+	// // 把 token 封装到 JwtAuthenticationResponse 里面返回
+	// return ResponseEntity.ok(new JwtAuthenticationResponse(token));
+	// }
 
 	/**
 	 * 刷新
@@ -120,8 +115,7 @@ public class TokenCtr
 		 */
 	}
 
-	@ExceptionHandler(
-	{AuthenticationException.class})
+	@ExceptionHandler({AuthenticationException.class})
 	public ResponseEntity<String> handleAuthenticationException(final AuthenticationException e)
 	{
 		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());

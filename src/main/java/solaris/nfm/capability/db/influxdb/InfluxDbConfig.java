@@ -12,7 +12,7 @@ public class InfluxDbConfig
 	private String	userName;
 
 	@Value("${spring.influx.password:''}")
-	private String	password;
+	private String	pwpwpwpw;
 
 	@Value("${spring.influx.database:''}")
 	private String	database;
@@ -20,6 +20,6 @@ public class InfluxDbConfig
 	@Bean
 	public InfluxDbUtils influxDbUtils()
 	{
-		return new InfluxDbUtils(userName, password, influxDBUrl, database, "logmonitor");
+		return new InfluxDbUtils(userName, pwpwpwpw, influxDBUrl, database, "logmonitor");
 	}
 }

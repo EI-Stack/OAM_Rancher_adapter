@@ -2,13 +2,12 @@ package solaris.nfm.config.security.domain;
 
 import java.io.IOException;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
 @Component
@@ -21,20 +20,20 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint
 		log.warn("\t[Auth] Request ({}) is failed, message: {}", request.getRequestURI(), authenticationException.getMessage());
 		// authenticationException.printStackTrace();
 
-		//		if (authenticationException instanceof BadCredentialsException)
-		//		{
-		//			log.info("用户登录时身份认证失败.");
-		//		} else if (authException instanceof InsufficientAuthenticationException)
-		//		{
-		//			log.info("缺少请求头参数,Authorization传递是token值所以参数是必须的.");
-		//		} else
-		//		{
-		//			log.info("用户token无效.");
-		//		}
+		// if (authenticationException instanceof BadCredentialsException)
+		// {
+		// log.info("用户登录时身份认证失败.");
+		// } else if (authException instanceof InsufficientAuthenticationException)
+		// {
+		// log.info("缺少请求头参数,Authorization传递是token值所以参数是必须的.");
+		// } else
+		// {
+		// log.info("用户token无效.");
+		// }
 
 		response.setContentType("application/json");
 		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-		response.getOutputStream().println("{ \"message\": \"" + authenticationException.getMessage() + "\" }");
+		// response.getOutputStream().println("{ \"message\": \"" + authenticationException.getMessage() + "\" }");
 
 		// response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
 	}
@@ -45,6 +44,6 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint
 
 		response.setContentType("application/json");
 		response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-		response.getOutputStream().println("{ \"message\": \"" + message + "\" }");
+		// response.getOutputStream().println("{ \"message\": \"" + message + "\" }");
 	}
 }

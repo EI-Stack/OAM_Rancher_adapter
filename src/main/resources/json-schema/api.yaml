@@ -1,0 +1,63 @@
+openapi: 3.0.1
+$id: 'resource:/json-schema/'
+
+CapabilityEnabledStatus:
+  type: object
+  properties:
+    enabled:
+      type: boolean
+  required: [enabled]
+
+createMailGroup:
+  type: object
+  properties:
+    name:
+      type: string
+      maxLength: 16
+    mailAddresses:
+      type: array
+      minItems: 1
+      maxItems: 30
+      items:
+        type: string
+        maxLength: 320
+        pattern: '^[a-z0-9_.+-]+@[a-z0-9.-]+\.[a-z]{2,6}$'
+  required: [name, mailAddresses]
+  
+$ref: 'ric-slice.yaml#/ResourceMonitor'
+
+A01:
+  type: object
+  properties:
+    operation:
+      type: string
+      enum: [copy, move, delete]
+    sourceSliceName:
+      type: string  
+    sourceServiceAreaListName:
+      type: string  
+  required: [operation, sourceSliceName, sourceServiceAreaListName]
+  allOf:
+    - if:
+        properties:
+          operation:
+            const: copy
+      then:
+        properties:
+          targetSliceName:
+            type: string  
+          targetServiceAreaListName:
+            type: string
+        required: [targetSliceName, targetServiceAreaListName]     
+    - if:
+        properties:
+          operation:
+            const: move
+      then:
+        properties:
+          targetSliceName:
+            type: string  
+          targetServiceAreaListName:
+            type: string
+        required: [targetSliceName, targetServiceAreaListName]    
+  

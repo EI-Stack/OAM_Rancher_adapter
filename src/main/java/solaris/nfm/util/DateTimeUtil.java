@@ -77,7 +77,7 @@ public class DateTimeUtil
 	}
 
 	/**
-	 * Cast LocalDateTime to zoned ISO string (2016-12-27T08:15:05.674+01:00)
+	 * Cast LocalDateTime to zoned ISO string (2016-12-27T08:15:05.674+00:00)
 	 */
 	public static String castLocalDateTimeToZonedIsoString(final LocalDateTime localDateTime)
 	{
@@ -92,6 +92,14 @@ public class DateTimeUtil
 	{
 		final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 		return localDateTime.format(formatter);
+	}
+
+	/**
+	 * Cast ZonedDateTime to zoned ISO string (2016-12-27T08:15:05.674+08:00)
+	 */
+	public static String castZonedDateTimeToZonedIsoString(final ZonedDateTime zonedDateTime)
+	{
+		return zonedDateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
 	}
 
 	/**

@@ -6,24 +6,34 @@ solaris:
   # 自定義：Server Connection Configuration
   #====================================================================================================================#
   server:
-    k8s:
-      http: 
-        url: ${K8S_URL}
-    fgc:
-      http:
-        url: ${FGC_URL}
+    adapter:
+      core:
+        http:
+          url: ${ADAPTER_CORE_URL}
+      security:
+        http:
+          url: ${ADAPTER_SECURITY_URL}
     mec:
       http:
         url: ${MEC_URL}
     ric:
       http:
         url: ${RIC_URL}
+    lm:
+      http:
+        url: ${LM_URL}
     open-daylight:
       http:
         host: ${ODL_HOST}
         port: ${ODL_PORT}
       openflow:
         vlan-match: ${OPENFLOW_VLAN_MATCH:false}
+  #====================================================================================================================#
+  # 自定義：調用 API 時，用於 Header/Body 資料加解密
+  #====================================================================================================================#
+  rest:
+    encrypt:
+      key: ${REST_ENCRYPT_KEY}  # 16 bytes for AES-128, 24 bytes for AES-192, 32 bytes for AES-256
 #======================================================================================================================#
 # Spring
 #======================================================================================================================#
@@ -32,7 +42,7 @@ spring:
   # Data Source (目前這個配置不使用，保留作為標準範本)
   #====================================================================================================================#  
   datasource:    
-    url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+    url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/solaris
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
     #==================================================================================================================#
@@ -58,4 +68,11 @@ spring:
     port: ${MAIL_PORT}
     username: ${MAIL_USER}
     password: ${MAIL_PASSWORD}
+    send-to: ${SEND_TO}
+    send-bcc: ${SEND_BCC}
     
+  #====================================================================================================================#
+  # Cache   
+  #====================================================================================================================#  
+  cache:
+    clear-interval: ${CACHE_INTERVAL}

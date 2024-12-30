@@ -6,21 +6,33 @@ solaris:
   # 自定義：Server Connection Configuration
   #====================================================================================================================#
   server:
-    k8s:
-      http:
-        url: http://127.0.0.1:8081 #edgeCloud server
-        # url: http://192.168.50.130:8080  # benson desktop
-        # url: http://111.70.20.164:30380        
-        # url: http://60.251.156.216:31092
-        # url: http://60.251.156.211:6001
+    adapter:
+      core:
+        http:
+          # url: http://60.251.156.214:33094
+          # url: http://60.251.156.216:31092
+          url: 60.251.156.213:33094
+          # url: http://60.251.156.216:31092
+        ssl:
+          enabled: false                 # 是否啟用安全傳輸通道
+          bundle: http-client           # SSL Bundle 的名稱
+          client-auth: need             # 是否進行雙向認證
+          protocol: TLS                 # 安全傳輸通道的加密類型
+          enabled-protocols: TLSv1.2    # 加密類型版
+      security:
+        http:
+          url: http://60.251.156.214:30094
     mec:
       http:
-        # url: http://60.251.156.216:31088/nextems/api/v1
-        url: http://60.250.198.204:8080/nextems/api/v1
+        url: http://60.251.156.214:30388/nextems/api/v1
     ric:
       http:
-        # url: http://60.251.156.216:31088
-        url: http://127.0.0.1:8081
+        url: http://60.251.156.214:30388
+        # url: http://211.20.94.200:10021  # ITRI remote
+    lm:
+      http:
+        url: http://60.251.156.216:33093/v1
+        token: eyJhbGciOiJIUzUxMiJ9.eyJleHAiOjE2MzUzMDMxNDAsInVzZXJuYW1lIjoibG0tbWFuYWdlciJ9.b2rqOXKO9TZVDJ0lt0wu6A0dzrYTMlJePs9HTuE5VcAlfEsIQTstUgFXhHfNcNByYR9fMZHHcIEYT9DhABSUcA
     open-daylight:
       http:
         host: localhost
@@ -31,9 +43,22 @@ solaris:
       openflow:
         vlan-match: true
   #====================================================================================================================#
+  # 自定義：當在零信任架構下，註明 PostgreSQL 連線所需的根憑證
+  #====================================================================================================================#
+  postgresql: 
+    root-cert-file-location: classpath:cert/ca.crt
+  #====================================================================================================================#
+  # 自定義：JSON Validation
+  #====================================================================================================================#
+  json-valid:
+    amqp:
+      enable: true  # 接收 AMQP message 是否啟用 JSON validation，true 代表啟用
+  #====================================================================================================================#
   # 自定義：Security (JWT Token, Role Hierarchy)
   #====================================================================================================================#
   security:
+    jwt:
+      secret: gyrfalcon-2019
     jwt-token:
       tokenHeader: Authorization      # 存放 Token 的 Header Key
       tokenPrefixString: "Bearer "    # token 的前綴字串
@@ -65,22 +90,68 @@ solaris:
 #======================================================================================================================#
 spring:
   application:
-    name: Solaris Network Function Manager
-  profiles:
-    active: dev  
+    name: Solaris Network Function Manager    
+  #====================================================================================================================#
+  # 靜態文件目錄
+  #====================================================================================================================#  
+  #  mvc:
+  #    static-path-pattern: /static/**     # 配置靜態資源請求的前綴路徑，預設值是根目錄 /
+  # 預設會去抓取三個目錄檔案 classpath: /static, /public, /resources 
   #====================================================================================================================#
   # 匯入外部 yaml 檔案
   #====================================================================================================================#  
   config:
     import: config/server.yaml, config/actuator.yaml
   #====================================================================================================================#
+  # SSL Bundle
+  #====================================================================================================================#  
+  ssl:
+    bundle:
+      jks:
+        # 用途： HTTP Clients --> NFM
+        http-server:
+          key:
+            alias: nfm
+          keystore:
+            location: classpath:cert/nfm-keystore-p12.pfx
+            password: 123456
+            type: PKCS12  
+          truststore:
+            location: classpath:cert/nfm-truststore-p12-http-server.pfx
+            password: 654321
+            type: PKCS12          
+        # 用途： NFM --> HTTP Servers
+        http-client:
+          key:
+            alias: nfm
+          keystore:
+            location: classpath:cert/nfm-keystore-p12.pfx
+            password: 123456
+            type: PKCS12  
+          truststore:
+            location: classpath:cert/nfm-truststore-p12-http-client.pfx
+            password: 654321
+            type: PKCS12          
+        # 用途： NFM --> RabbitMQ Broker
+        amqp-client:
+          key:
+            alias: rmq
+          keystore:
+            location: classpath:cert/nfm-keystore-p12.pfx
+            password: 123456
+            type: PKCS12  
+          truststore:
+            location: classpath:cert/nfm-truststore-p12-amqp-client.pfx
+            password: 654321
+            type: PKCS12          
+  #====================================================================================================================#
   # Data Source
   #====================================================================================================================#  
   datasource:    
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/edge_cloud
+    #url: jdbc:postgresql://localhost:5432/solaris
+    url: jdbc:postgresql://postgres-svc:5432/solaris?sslmode=verify-full&sslrootcert=${solaris.postgresql.root-cert-file-location}
     username: postgres
-    # password: Hello2020
     #==================================================================================================================#
     # Connection Pool - Hikari
     #==================================================================================================================#  
@@ -104,7 +175,7 @@ spring:
     open-in-view: true  # 解決在 Spring MVC 與 JPA 之間 Session 的聲明週期問題
     properties:
       hibernate:
-        default_schema: backend
+        default_schema: nfm
         dialect: org.hibernate.dialect.PostgreSQLDialect
         enable_lazy_load_no_trans: true
         temp:
@@ -128,7 +199,8 @@ spring:
   #====================================================================================================================#
   # Cache   
   #====================================================================================================================#  
-#  cache:    
+  cache:
+    clear-interval: 1               # Clear cache interval (s)  預設值 1 分鐘       
 #    type: redis
 #    redis:
 #      time-to-live: 3600000     
@@ -136,6 +208,7 @@ spring:
   # MULTIPART (MultipartProperties) 
   #====================================================================================================================#  
   servlet:
+    context-path: /myapp
     multipart:
       enabled: true                 # 是否允許上傳複數文件
       file-size-threshold: 0B       # 文件寫入磁碟後的預設值。值可以使用後缀“MB”或“KB”
@@ -166,20 +239,22 @@ spring:
   # RabbitMQ 
   #====================================================================================================================#  
   rabbitmq:   
-    host: 60.251.156.214
-    port: 32672                               # AMQP 加密 port 5671    MQTT port 1883
+    host: 60.251.156.213
+    port: 38772                               # AMQP 加密 port 5671    MQTT port 1883
     virtual-host: /                           # dev 是測試專用 vhost
-    username: admin 
+    username: admin
     connection-timeout: 1s          
     publisher-returns: true                   # 開啟 return 確認機制
     publisher-confirm-type: CORRELATED        # 開啟 confirm 確認機制
     ssl:
-      enabled: false
+      enabled: false                          # 啟用 RabbitMQ 客戶端 SSL 連接
       algorithm: TLSv1.2
-      key-store: /rabbitmq-security/dev/inno-certs-p12/keycert.p12
-      key-store-password: tihm2k16
-      trust-store: /rabbitmq-security/dev/rabbitstore
-      trust-store-password: truststorepass 
+      key-store: classpath:cert/nfm-keystore-p12.pfx
+      key-store-password: 123456
+      trust-store: classpath:cert/nfm-truststore-p12-amqp-client.pfx                  
+      trust-store-password: 654321
+      trust-store-type: PKCS12
+      verify-hostname: false 
     listener:
       simple:
         acknowledge-mode: manual
@@ -207,7 +282,9 @@ spring:
   # Mail
   #====================================================================================================================#
   mail:
-    send-from: system@nfm
+    send-from: service@onmywebs.com
+    send-to: system@nfm
+    send-bcc: system@nfm
     host: www.onmywebs.com
     port: 587
     username: service@onmywebs.com
@@ -235,7 +312,7 @@ spring:
   data:
     web:
       pageable:
-        default-page-size: 100         # Default page size. (default: 20)
+        default-page-size: 5         # Default page size. (default: 20)
         max-page-size: 500           # Maximum page size to be accepted. (default: 2000)
         one-indexed-parameters: true # Whether to expose and assume 1-based page number indexes.
         page-parameter: page         # Page index parameter name.
@@ -243,7 +320,7 @@ spring:
         qualifier-delimiter: _       # Delimiter to be used between the qualifier and the actual page number and size properties.
         size-parameter: size         # Page size parameter name.
         sort:
-          sort-parameter: id         # Sort parameter name.  
+          sort-parameter: id         # Sort parameter name. 
 #======================================================================================================================#
 # Logging
 #======================================================================================================================#
@@ -259,12 +336,12 @@ logging:
     solaris.nfm.Application: INFO
 
     java.lang.Class: WARN
-    javax.activation: WARN
+    jakarta.activation: WARN
     # mail
-    javax.mail: WARN
-    javax.management: WARN
-    javax.management.remote.rmi: WARN
-    javax.management.mbeanserver: WARN
+    jakarta.mail: WARN
+    jakarta.management: WARN
+    jakarta.management.remote.rmi: WARN
+    jakarta.management.mbeanserver: WARN
     jdk.event.security: WARN
 
     _org.springframework.web.servlet.HandlerMapping.Mappings: WARN
@@ -279,6 +356,8 @@ logging:
     org.flywaydb.core: WARN
     org.xnio: WARN  
    
+    # Json Schema Validation
+    com.networknt.schema: WARN
     com.zaxxer.hikari: WARN
     com.zaxxer.hikari.pool.ProxyConnection: WARN
     # JsonPath
@@ -299,6 +378,7 @@ logging:
     io.micrometer: WARN
     reactor.core.publisher: WARN
     reactor.util.Loggers: WARN
+    angus.activation: WARN
   
   ## path & file 都不設定的話，就不會產生日誌檔案。
   #path:          # 配置日誌的路径。如果没有配置 logging.file, 將默認使用 spring.log 作为文件名
@@ -310,4 +390,4 @@ logging:
     throw-exception-if-no-handler-found: true
 # 不要为我们工程中的资源文件建立映射
   resources:
-    add-mappings: false
+    add-mappings: false      

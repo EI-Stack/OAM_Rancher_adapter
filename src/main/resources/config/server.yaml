@@ -2,10 +2,16 @@
 # Server
 #======================================================================================================================#
 server:  
-  port: 8080  # Spring Boot 内置 Web 容器預設 port
+  port: 8080                    # Spring Boot 内置 Web 容器預設 port
   servlet:
     contextPath:
   shutdown: graceful  
+  ssl:
+    enabled: false               # 是否啟用安全傳輸通道
+    bundle: http-server         # SSL Bundle 的名稱
+    client-auth: need           # 是否進行雙向認證
+    protocol: TLS               # 安全傳輸通道的加密類型
+    enabled-protocols: TLSv1.2  # 加密類型版本
   # undertow:
     # 设置 IO 线程数, 它主要执行非阻塞的任务,它们会负责多个连接, 默认设置每个CPU核心一个线程
     # 不要设置过大，如果过大，启动项目会报错：打开文件数过多

@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -45,8 +46,8 @@ public class JwtTokenUtil implements Serializable
 
 	private Clock				clock				= DefaultClock.INSTANCE;
 
-	// @Value("${jwt.secret}") //从配置文件去获取自定义口令，然后注入到 secret 中来
-	private String				secret				= "gyrfalcon-2019";
+	@Value("${solaris.security.jwt.secret}")     // 从配置文件去获取自定义口令，然后注入到 secret 中来
+	private String				secret;
 
 	// @Value("${jwt.expiration}")
 	private Long				expiration			= 604800L;
@@ -183,7 +184,7 @@ public class JwtTokenUtil implements Serializable
 		claims.setIssuedAt(createdDate);
 		claims.setExpiration(expirationDate);
 
-		return Jwts.builder().setClaims(claims).signWith(SignatureAlgorithm.HS512, secret).compact();
+		return Jwts.builder().setExpiration(expirationDate).setClaims(claims).signWith(SignatureAlgorithm.HS512, secret).compact();
 	}
 
 	public Boolean validateToken(final String token, final UserDetails userDetails)

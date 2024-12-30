@@ -23,6 +23,7 @@ public class ApiLogDto extends LogBaseDto
 	private String		requestUri;
 	private Integer		responseStatusCode;
 	private Boolean		isSuccessful;
+	private String		userIp;
 
 	public ApiLogDto()
 	{

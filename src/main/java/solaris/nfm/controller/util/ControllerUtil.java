@@ -3,8 +3,6 @@ package solaris.nfm.controller.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.http.HttpSession;
-
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
@@ -17,8 +15,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
-import solaris.nfm.config.security.bean.SpringUser;
 import solaris.nfm.config.security.domain.JwtUser;
 import solaris.nfm.exception.base.ExceptionBase;
 
@@ -40,6 +38,48 @@ public class ControllerUtil
 		root.set("content", arrayNode);
 		root.set("pagination", pagination);
 
+		return root;
+	}
+	
+	/**
+	 * 將集合類型的 Json 包裝成標準資料庫讀出規格 (並計算分頁資訊)
+	 */
+	public static JsonNode createResponseJson(final ArrayNode arrayNode, int page, int pageSize) {
+		final JsonNodeFactory jsonNodeFactory = JsonNodeFactory.instance;
+		ArrayNode filteredArray = jsonNodeFactory.arrayNode();
+		//start end 這兩個變數代表等等要取 ran list 的第幾筆到第幾筆資料
+		int start = 0;
+		int end = 0;
+		if(pageSize >= arrayNode.size()) {
+			end = arrayNode.size();
+		}else {
+			end = page * pageSize;
+		}
+		if(end > arrayNode.size()) {
+			end = arrayNode.size();
+		}
+		if(page == 1) {
+			start = 1;
+		}else {
+			start = (page - 1) * pageSize + 1;	
+		}
+		
+		for(int i = start - 1; i <= end - 1; i++) {  //減1是因為 arrayNode 的 get 要從 0 開始
+			filteredArray.add(arrayNode.get(i));
+		}
+		//計算分頁
+		int totalCount = arrayNode.size();
+		final ObjectNode pagination = JsonNodeFactory.instance.objectNode();
+
+		int totalPage = totalCount / pageSize;
+		if (totalCount % pageSize > 0) {
+			totalPage += 1;
+		}
+		pagination.put("pageNumber", page).put("pageSize", pageSize).put("totalPages", totalPage).put("totalElements", totalCount);
+		
+		final ObjectNode root = jsonNodeFactory.objectNode();
+		root.set("content", filteredArray);
+		root.set("pagination", pagination);
 		return root;
 	}
 
@@ -151,23 +191,24 @@ public class ControllerUtil
 	 * }
 	 */
 
-	public static SpringUser getSpringUser(final HttpSession httpSession)
-	{
-		JwtUser jwtUser = null;
-		final Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		if (principal instanceof UserDetails)
-		{
-			jwtUser = (JwtUser) principal;
-			// logger.debug("SpringUser found, name=[{}]", jwtUser.getUsername());
-		} else
-		{
-			log.error("Principal can not be cast as Spring User, principal=[{}]", principal.toString());
-		}
-
-		final SpringUser springUser = new SpringUser(jwtUser.getUsername(), jwtUser.getPassword(), jwtUser.getAuthorities());
-
-		return springUser;
-	}
+	// 此 method 沒有使用。因弱點掃描點出有 null pointer 的問題，故註解掉
+	// public static SpringUser getSpringUser(final HttpSession httpSession)
+	// {
+	// JwtUser jwtUser = null;
+	// final Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+	// if (principal instanceof UserDetails)
+	// {
+	// jwtUser = (JwtUser) principal;
+	// // logger.debug("SpringUser found, name=[{}]", jwtUser.getUsername());
+	// } else
+	// {
+	// log.error("Principal can not be cast as Spring User, principal=[{}]", principal.toString());
+	// }
+	//
+	// final SpringUser springUser = new SpringUser(jwtUser.getUsername(), jwtUser.getPassword(), jwtUser.getAuthorities());
+	//
+	// return springUser;
+	// }
 
 	public static WebAuthenticationDetails getWebAuthenticationDetailsFromSession(final HttpSession httpSession)
 	{

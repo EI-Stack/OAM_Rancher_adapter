@@ -49,7 +49,7 @@ public class InfluxDbService
 		try
 		{
 			// nodeDataType = dataModelSpecService.getResourceDataType(nodeId);
-			nodeDataType = null;
+			nodeDataType = "integer";
 		} catch (final Exception e)
 		{
 			return null;

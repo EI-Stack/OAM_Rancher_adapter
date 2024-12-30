@@ -66,9 +66,9 @@ public class AmqpService
 	}
 
 	@Async("taskExecutor")
-	public void sendMsgForOperation(final ApiLogDto apiLogDto) throws JsonProcessingException
+	public void sendMsgForOperationLog(final ApiLogDto apiLogDto) throws JsonProcessingException
 	{
-		log.debug("\t[AOP] [Operation Log] [{}]", objectMapper.readTree(objectMapper.writeValueAsString(apiLogDto)).toPrettyString());
+		log.debug("\t[AOP] [Operation Log] \n{}", objectMapper.readTree(objectMapper.writeValueAsString(apiLogDto)).toPrettyString());
 		final String routingKey = "nfm-to-lm-for-api";
 
 		try

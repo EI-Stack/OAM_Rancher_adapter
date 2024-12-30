@@ -1,12 +1,6 @@
 package solaris.nfm.util;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,66 +26,26 @@ public class Utils
 		throw new Exception("\t [Find class path] ...... Failed !!");
 	}
 
-	public static String executeCommandLine(final String command)
-	{
-		final StringBuffer commandLineResponeSB = new StringBuffer();
-		try
-		{
-			String lineResponeMessage;
-			final Process process = Runtime.getRuntime().exec(command);
-			final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream(), "MS950"));
-			while ((lineResponeMessage = bufferedReader.readLine()) != null)
-			{
-				commandLineResponeSB.append(lineResponeMessage + "\n");
-			}
-		} catch (final Exception e)
-		{
-			e.printStackTrace();
-		}
-		logger.debug("\t Command Line Respone =[" + commandLineResponeSB + "]");
-		return commandLineResponeSB.toString();
-	}
-
-	public static void backupDB(final Map argumentMap)
-	{
-		final List<String> commandList = new ArrayList<>();
-		final String backupCMD = "\"C:\\Program Files\\PostgreSQL\\8.4\\bin\\pg_dump.exe\"";
-		commandList.add(backupCMD);
-		commandList.add("--host");
-		commandList.add("140.92.13.220");
-		commandList.add("--port");
-		commandList.add("5432");
-		commandList.add("--username");
-		commandList.add("postgres");
-		commandList.add("--format");
-		commandList.add("custom");
-		commandList.add("--blobs");
-		commandList.add("--ignore-version");
-		commandList.add("--verbose");
-		commandList.add("--file");
-		commandList.add("\"C:\\ArcMatrix.backup\"");
-		commandList.add("funambol");
-		final ProcessBuilder processBuilder = new ProcessBuilder(commandList);
-		final Map<String, String> Envm = processBuilder.environment();
-		Envm.put("PGPASSWORD", "helloworld");
-		try
-		{
-			final Process process = processBuilder.start();
-		} catch (final IOException e)
-		{
-			e.printStackTrace();
-		}
-		final String backupFileName = "C:\\ArcMatrix.backup";
-		final File backupFile = new File(backupFileName);
-		final long size = backupFile.length();
-		if (size == 0)
-		{
-			System.out.println("Backup database failures!");
-		} else
-		{
-			System.out.println("Backup database succeeds!");
-		}
-	}
+	// 因弱點掃描點出有 null pointer 問題，故註釋掉
+	// public static String executeCommandLine(final String command)
+	// {
+	// final StringBuffer commandLineResponeSB = new StringBuffer();
+	// try
+	// {
+	// String lineResponeMessage;
+	// final Process process = Runtime.getRuntime().exec(command);
+	// final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream(), "MS950"));
+	// while ((lineResponeMessage = bufferedReader.readLine()) != null)
+	// {
+	// commandLineResponeSB.append(lineResponeMessage + "\n");
+	// }
+	// } catch (final Exception e)
+	// {
+	// e.printStackTrace();
+	// }
+	// logger.debug("\t Command Line Respone =[" + commandLineResponeSB + "]");
+	// return commandLineResponeSB.toString();
+	// }
 
 	public static File getFile(final String filePath, final String fileName) throws Exception
 	{
@@ -177,7 +131,8 @@ public class Utils
 	public static JsonNode xmlTagNameCastToCamelCase(final JsonNode input)
 	{
 		final Matcher matchKey = Pattern.compile("\"(.+?)\" ?: ?").matcher(input.toPrettyString());
-		final String result = matchKey.replaceAll(s -> {
+		final String result = matchKey.replaceAll(s ->
+		{
 			final Matcher matchDash = Pattern.compile("-[a-zA-Z]").matcher(s.group().toLowerCase());
 			return matchDash.replaceAll(d -> d.group().substring(1).toUpperCase());
 		});

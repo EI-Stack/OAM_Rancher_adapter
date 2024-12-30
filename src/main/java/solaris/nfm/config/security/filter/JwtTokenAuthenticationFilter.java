@@ -5,13 +5,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,7 +19,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import solaris.nfm.capability.rest.EncryptService;
 import solaris.nfm.config.security.bean.JwtTokenConfigBean;
 import solaris.nfm.config.security.domain.JwtAuthenticationEntryPoint;
 import solaris.nfm.config.security.domain.JwtUser;
@@ -43,12 +42,15 @@ public class JwtTokenAuthenticationFilter extends OncePerRequestFilter
 	@Autowired
 	private JwtAuthenticationEntryPoint	jwtAuthenticationEntryPoint;
 	@Autowired
-	private StringRedisTemplate			stringRedisTemplate;
+	private EncryptService				encryptService;
 
 	private String getJwtToken(final HttpServletRequest request)
 	{
 		final String headerAuthString = request.getHeader(jwtTokenConfigBean.getTokenHeader());
-		if (headerAuthString != null && headerAuthString.startsWith(jwtTokenConfigBean.getTokenPrefixString())) return headerAuthString.substring(jwtTokenConfigBean.getTokenPrefixString().length());
+		if (headerAuthString != null && headerAuthString.startsWith(jwtTokenConfigBean.getTokenPrefixString()))
+		{
+			return headerAuthString.substring(jwtTokenConfigBean.getTokenPrefixString().length());
+		}
 		return null;
 	}
 
@@ -60,6 +62,7 @@ public class JwtTokenAuthenticationFilter extends OncePerRequestFilter
 		// Long tenantId = null;
 		Long userId = null;
 		String username = null;
+		String userIp = null;
 		try
 		{
 			// if (jwtToken == null)
@@ -90,10 +93,11 @@ public class JwtTokenAuthenticationFilter extends OncePerRequestFilter
 				role = JwtTokenUtil.getRoleFromTokenPayload(tokenBodyJson);
 				if (role.equals("ROLE_Portal"))
 				{
-					userId = (request.getHeader("userId") == null) ? -3L : Long.parseLong(request.getHeader("userId").trim());
+					userId = encryptService.getUserId(request.getHeader("userId"));
 					// tenantId = checkTenantId(request.getHeader("tenantId"));
 					// 此處要把 username 換成 header 上所帶的 username，而不是使用 token 上的 username
-					username = (request.getHeader("username") == null) ? "NO-DATA" : request.getHeader("username").trim();
+					username = encryptService.getUserName(request.getHeader("userName"));
+					userIp = encryptService.getUserIp(request.getHeader("userIp"));
 				} else if (role.equals("ROLE_LogManager"))
 				{
 					userId = -1L;
@@ -111,6 +115,7 @@ public class JwtTokenAuthenticationFilter extends OncePerRequestFilter
 					username = JwtTokenUtil.getUsernameFromTokenPayload(tokenBodyJson);
 				}
 			}
+
 			final String queryString = (request.getQueryString() == null) ? "" : "?" + request.getQueryString();
 			if (!(request.getRequestURI().equalsIgnoreCase("/v1/devices") && request.getMethod().equals("GET"))
 					&& !(request.getRequestURI().equalsIgnoreCase("/v1/devices/search") && request.getMethod().equals("POST")) && !(request.getRequestURI().startsWith("/v1/network")))
@@ -128,7 +133,7 @@ public class JwtTokenAuthenticationFilter extends OncePerRequestFilter
 		{
 			final List<GrantedAuthority> authorities = new ArrayList<>(1);
 			authorities.add(new SimpleGrantedAuthority(role));
-			final JwtUser jwtUser = new JwtUser(userId, username, "", true, LocalDateTime.now(), authorities);
+			final JwtUser jwtUser = new JwtUser(userId, username, "", true, LocalDateTime.now(), userIp, authorities);
 
 			final UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(jwtUser, null, authorities);
 			authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
@@ -143,6 +148,7 @@ public class JwtTokenAuthenticationFilter extends OncePerRequestFilter
 			chain.doFilter(request, response);
 		} catch (final AccessDeniedException e)
 		{
+			log.debug("xxxx1");
 			SecurityContextHolder.clearContext();
 			final String message = "The role (" + role + ") has no authorization to access URI (" + request.getRequestURI() + ")";
 			jwtAuthenticationEntryPoint.commenceForAccessDenied(request, response, message);
@@ -153,7 +159,10 @@ public class JwtTokenAuthenticationFilter extends OncePerRequestFilter
 	private Long checkTenantId(final String tenantIdString)
 	{
 		// 檢查不可為空
-		if (!StringUtils.hasText(tenantIdString)) throw new BadCredentialsException("There is no tenant ID in request");
+		if (!StringUtils.hasText(tenantIdString))
+		{
+			throw new BadCredentialsException("There is no tenant ID in request");
+		}
 		// 檢查合法的 Long
 		Long tenantId = null;
 		try
@@ -164,12 +173,15 @@ public class JwtTokenAuthenticationFilter extends OncePerRequestFilter
 			throw new BadCredentialsException("Tenant ID (" + tenantIdString.trim() + ") is NOT a number.");
 		}
 
-		if (tenantId < -1L) throw new BadCredentialsException("Tenant ID (" + tenantId + ") is smaller than -1.");
-		// 檢查是否存在於 data source pool
-		// final String beanName = DynamicDataSourceUtil.getBeanName(tenantId);
-		// Map<Object, Object> targetDataSources = dynamicRoutingDataSource.getNeoTargetDataSources();
-		// if (!targetDataSources.containsKey(beanName))
-		// throw new BadCredentialsException("Tenant ID (" + tenantId + ") does NOT exist.");
+		if (tenantId < -1L)
+		{
+			throw new BadCredentialsException("Tenant ID (" + tenantId + ") is smaller than -1.");
+			// 檢查是否存在於 data source pool
+			// final String beanName = DynamicDataSourceUtil.getBeanName(tenantId);
+			// Map<Object, Object> targetDataSources = dynamicRoutingDataSource.getNeoTargetDataSources();
+			// if (!targetDataSources.containsKey(beanName))
+			// throw new BadCredentialsException("Tenant ID (" + tenantId + ") does NOT exist.");
+		}
 
 		return tenantId;
 	}

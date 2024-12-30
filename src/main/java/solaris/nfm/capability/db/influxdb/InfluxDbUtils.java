@@ -12,7 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 public class InfluxDbUtils
 {
 	private String			userName;
-	private String			password;
+	private String			pwpwpwpw;
 	private String			url;
 	public String			database;
 	private String			retentionPolicy;
@@ -22,10 +22,10 @@ public class InfluxDbUtils
 	// 數據保存策略
 	public static String	policyNamePix	= "logmonitor";
 
-	public InfluxDbUtils(final String userName, final String password, final String url, final String database, final String retentionPolicy)
+	public InfluxDbUtils(final String userName, final String pwpwpwpw, final String url, final String database, final String retentionPolicy)
 	{
 		this.userName = userName;
-		this.password = password;
+		this.pwpwpwpw = pwpwpwpw;
 		this.url = url;
 		this.database = database;
 		this.retentionPolicy = retentionPolicy == null || "".equals(retentionPolicy) ? "autogen" : retentionPolicy;
@@ -41,7 +41,7 @@ public class InfluxDbUtils
 	{
 		if (influxDB == null)
 		{
-			influxDB = InfluxDBFactory.connect(url, userName, password);
+			influxDB = InfluxDBFactory.connect(url, userName, pwpwpwpw);
 		}
 		try
 		{

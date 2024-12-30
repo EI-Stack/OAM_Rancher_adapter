@@ -1,10 +1,10 @@
 package solaris.nfm.util.override;
 
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
 
 public class NeoServletContextListener implements ServletContextListener
 {
@@ -19,7 +19,7 @@ public class NeoServletContextListener implements ServletContextListener
 			// DefaultScheduler.getInstance().startScheduler();
 			// GuaranteeScheduler.getInstance().startScheduler();
 			// SystemInternalParameter.getInstance();
-		} catch (Exception e)
+		} catch (final Exception e)
 		{
 			e.printStackTrace();
 		}
@@ -35,7 +35,7 @@ public class NeoServletContextListener implements ServletContextListener
 			Thread.sleep(1000);
 			// DefaultScheduler.getInstance().stopScheduler();
 			// GuaranteeScheduler.getInstance().stopScheduler();
-		} catch (Exception e)
+		} catch (final Exception e)
 		{
 			e.printStackTrace();
 		}

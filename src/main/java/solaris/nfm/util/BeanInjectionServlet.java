@@ -4,16 +4,16 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.Collection;
 
-import javax.annotation.Resource;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
+
+import jakarta.annotation.Resource;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
 
 /**
  * 支持 {@link Resource} 和 {@link Autowired} 动态注入的 GWT RPC 基类。
@@ -32,7 +32,7 @@ public abstract class BeanInjectionServlet extends HttpServlet
 		try
 		{
 			doInjection();
-		} catch (Throwable t)
+		} catch (final Throwable t)
 		{
 			logger.error(null, t);
 			if (t instanceof ServletException)
@@ -52,20 +52,20 @@ public abstract class BeanInjectionServlet extends HttpServlet
 	protected void doInjection() throws ServletException
 	{
 		// 找到 ApplicationContext
-		WebApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(getServletContext());
+		final WebApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(getServletContext());
 		if (ctx == null)
 		{
 			logger.error("\t [ Injection Servelet ] Can not find Spring web application context, failed to do injection");
 			return;
 		}
 		// 查找实现类的元数据，并进行依赖注入
-		for (Field field : getClass().getDeclaredFields())
+		for (final Field field : getClass().getDeclaredFields())
 		{
-			for (Annotation annotation : field.getDeclaredAnnotations())
+			for (final Annotation annotation : field.getDeclaredAnnotations())
 			{
 				if (annotation instanceof Resource)
 				{
-					Resource res = (Resource) annotation;
+					final Resource res = (Resource) annotation;
 					if (res.name() != null && !"".equals(res.name().trim()))
 					{
 						// beanName injection
@@ -76,7 +76,7 @@ public abstract class BeanInjectionServlet extends HttpServlet
 					} else if (!Object.class.equals(res.type()))
 					{
 						// beansType injection
-						Collection<?> c = BeanFactoryUtils.beansOfTypeIncludingAncestors(ctx, (Class<?>) res.type()).values();
+						final Collection<?> c = BeanFactoryUtils.beansOfTypeIncludingAncestors(ctx, (Class<?>) res.type()).values();
 						if (field.getType().isAssignableFrom(Collection.class))
 						{
 							// 集合类型
@@ -84,7 +84,7 @@ public abstract class BeanInjectionServlet extends HttpServlet
 							{
 								field.setAccessible(true);
 								field.set(this, c);
-							} catch (Exception e)
+							} catch (final Exception e)
 							{
 								logger.error("\t [ Injection Servelet ]Failed to do injection for " + field, e);
 								throw new ServletException(e);
@@ -98,7 +98,7 @@ public abstract class BeanInjectionServlet extends HttpServlet
 								{
 									field.setAccessible(true);
 									field.set(this, c.iterator().next());
-								} catch (Exception e)
+								} catch (final Exception e)
 								{
 									logger.error("Failed to do injection for " + field, e);
 									throw new ServletException(e);
@@ -111,13 +111,10 @@ public abstract class BeanInjectionServlet extends HttpServlet
 								logger.error("\t [ Injection Servelet ] Can not find bean of type '" + res.type() + ", auto-injection failed");
 							}
 						}
-					} else
+					} else // 尝试根据字段的名称自动匹配注入
+					if (!injectWithBeanName(field.getName(), field, ctx))
 					{
-						// 尝试根据字段的名称自动匹配注入
-						if (!injectWithBeanName(field.getName(), field, ctx))
-						{
-							logger.error("\t [ Injection Servelet ] Either beanName or beansType attribute must be set for " + "@Resource annotation, failed to do injection for " + field);
-						}
+						logger.error("\t [ Injection Servelet ] Either beanName or beansType attribute must be set for " + "@Resource annotation, failed to do injection for " + field);
 					}
 				} else if (annotation instanceof Autowired)
 				{
@@ -152,7 +149,7 @@ public abstract class BeanInjectionServlet extends HttpServlet
 			try
 			{
 				bean = webApplicationContext.getBean(beanName + "Impl");
-			} catch (Exception e)
+			} catch (final Exception e)
 			{
 				logger.error("\t [ Injection Servelet ] Can not find Bean (" + beanName + "Impl" + ")");
 			}
@@ -172,7 +169,7 @@ public abstract class BeanInjectionServlet extends HttpServlet
 				logger.error("类型不匹配" + field);
 				return false;
 			}
-		} catch (Exception e)
+		} catch (final Exception e)
 		{
 			// 找不到 Bean
 			logger.error("\t [ Injection Servelet ] Can not find Bean (" + beanName + ")", e);
@@ -183,7 +180,7 @@ public abstract class BeanInjectionServlet extends HttpServlet
 			field.setAccessible(true);
 			field.set(this, bean);
 			return true;
-		} catch (Exception e)
+		} catch (final Exception e)
 		{
 			logger.error("\t  [ Injection Servelet ] Failed to do injection for " + beanName, e);
 			throw new ServletException(e);

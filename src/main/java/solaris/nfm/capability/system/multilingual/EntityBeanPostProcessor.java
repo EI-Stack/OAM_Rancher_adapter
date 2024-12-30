@@ -8,13 +8,12 @@ import java.lang.reflect.Parameter;
 import java.lang.reflect.Proxy;
 import java.util.Map;
 
-import javax.validation.Valid;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
 //@Component
@@ -32,7 +31,7 @@ public class EntityBeanPostProcessor implements BeanPostProcessor
 		// return bean;
 		// }
 
-		if (!beanName.startsWith("javax.validation.constraints") && !beanName.startsWith("org.hibernate.validator.internal.constraintvalidators"))
+		if (!beanName.startsWith("jakarta.validation.constraints") && !beanName.startsWith("org.hibernate.validator.internal.constraintvalidators"))
 		{
 			// 如果不是 JDK 中的校驗註解並且不是 Hibernate 中的校驗註解，不需要處理
 			return bean;
@@ -66,7 +65,7 @@ public class EntityBeanPostProcessor implements BeanPostProcessor
 						log.debug("------------------------------------------------------------------------------------------");
 						final String annotationName = annotation.annotationType().getName();
 						log.debug("annotationName={}", annotationName);
-						if (!annotationName.startsWith("javax.validation.constraints") && !annotationName.startsWith("org.hibernate.validator.internal.constraintvalidators"))
+						if (!annotationName.startsWith("jakarta.validation.constraints") && !annotationName.startsWith("org.hibernate.validator.internal.constraintvalidators"))
 						{
 							// 如果不是 JDK 中的校驗註解並且不是 Hibernate 中的校驗註解，不需要處理
 							continue;
@@ -91,7 +90,7 @@ public class EntityBeanPostProcessor implements BeanPostProcessor
 							final String message = map.get("message");
 
 							// 如果 message 已經存在，並且是預設的訊息，才進行替換，否則不替換
-							if (message.startsWith("{javax.validation") || message.startsWith("{org.hibernate.validator.internal.constraintvalidators"))
+							if (message.startsWith("{jakarta.validation") || message.startsWith("{org.hibernate.validator.internal.constraintvalidators"))
 							{
 								map.put("message", "{" + fieldName + "}");
 							}

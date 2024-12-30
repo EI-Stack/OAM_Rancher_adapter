@@ -9,5 +9,7 @@ META-INF/
 .classpath
 .project
 .settings
+.factorypath
 desktop.ini
 src/main/resources/application-dev.yaml
+src/main/java/solaris/nfm/controller/FgcCtr-C.backup

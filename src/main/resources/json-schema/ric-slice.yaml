@@ -1,0 +1,174 @@
+openapi: 3.0.1
+$id: 'resource:/json-schema/'
+
+RicSliceCreation:
+  type: object
+  properties:
+    ricSliceId:                                    # 1 為預設切片，不可使用
+      type: integer
+      minimum: 2
+    sliceContent:
+      type: object
+      properties:
+        description:
+          type: string
+        maxNumberofUEs:                            # slice 需要支援的最大 UE 數
+          type: integer
+        coverageArea:
+          type: string
+        latency:
+          type: number
+        uEMobilityLevel:
+          type: string
+          enum:
+          - STATIONARY
+          - NOMADIC
+          - RESTRICTED_MOBILITY
+          - FULLY_MOBILITY      
+          # $ref: 'TS28541_SliceNrm.yaml#/components/schemas/MobilityLevel'  # [STATIONARY, NOMADIC, RESTRICTED MOBILITY, FULLY MOBILITY]]
+        resourceSharingLevel:
+          type: string
+          enum:
+          - SHARED
+          - NOT_SHARED      
+          # $ref: 'TS28541_SliceNrm.yaml#/components/schemas/SharingLevel'  # [SHARED, NON-SHARED]
+        resourceSharingGroup:                      # 若slice 使用共享資源則此 group id 用來記錄那些 slice 使用同一塊資源 1~10
+          type: integer
+          minimum: 1
+          maximum: 10       
+        sST:
+          $ref: 'R16/TS28541_NrNrm.yaml#/components/schemas/Sst'
+        availability:
+          type: number
+        dLThptPerSlice:
+          $ref: "#/$defs/Throughput"
+        dLThptPerUE:
+          $ref: "#/$defs/Throughput"
+        uLThptPerSlice:
+          $ref: "#/$defs/Throughput"
+        uLThptPerUE:
+          $ref: "#/$defs/Throughput"
+        maxNumberofPDUSessions:
+          type: object
+          properties:
+            nOofPDUSessions:
+              type: integer
+          required:
+          - nOofPDUSessions
+        activityFactor:
+          $ref: 'R16/TS28541_SliceNrm.yaml#/components/schemas/Float'
+      required:
+      - description
+      - maxNumberofUEs
+      - coverageArea
+      - latency
+      - uEMobilityLevel
+      - resourceSharingLevel
+      - resourceSharingGroup
+      - sST
+      - availability
+      - dLThptPerSlice
+      - dLThptPerUE
+      - uLThptPerSlice
+      - uLThptPerUE
+      - maxNumberofPDUSessions
+      - activityFactor
+    cells:
+      type: array
+      minItems: 1
+      items:
+        type: object
+        properties:
+          NCI:
+            type: integer
+            minimum: 1
+          RateofPRB:                               # 描述 cell 的 prb 可以支援多大的頻寬 (單位 bps per prb)
+            type: integer
+            minimum: 0
+          Userdefined:                             # 本 cell 是否開啟使用者自訂資源分配 ("true" or "false")
+            type: boolean
+          allocate:
+            type: object
+            properties:
+              UEs:                                 # 使用者自定該 cell 要分配多少 UE 數量需求，若 Userdefined 為 true 此處設定才有意義
+                type: integer
+                minimum: 0
+              PRBs:                                # 使用者自定該 cell 要分配多少 prb 數量需求，若 Userdefined 為 true 此處設定才有意義
+                type: integer
+                minimum: 0
+            required:
+            - UEs
+            - PRBs
+        required: [NCI, RateofPRB, Userdefined]
+        
+        if:
+          properties:
+            Userdefined:
+              const: true
+        then:
+          required: [allocate]
+  required: [ricSliceId, sliceContent, cells]
+  
+  $defs:
+    Throughput:
+      type: object
+      properties:
+        guaThpt:
+          $ref: 'R16/TS28541_SliceNrm.yaml#/components/schemas/Float'
+        maxThpt:
+          $ref: 'R16/TS28541_SliceNrm.yaml#/components/schemas/Float'
+      required: [guaThpt, maxThpt]
+
+RicSliceModification:
+  type: object
+  properties:
+    cells:
+      type: array
+      minItems: 1
+      items:
+        type: object
+        properties:
+          NCI:
+            type: integer
+            minimum: 1
+          RateofPRB:                               # 描述 cell 的 prb 可以支援多大的頻寬 (單位 bps per prb)
+            type: integer
+            minimum: 0
+          Userdefined:                             # 本 cell 是否開啟使用者自訂資源分配 ("true" or "false")
+            type: boolean
+          allocate:
+            type: object
+            properties:
+              UEs:                                 # 使用者自定該 cell 要分配多少 UE 數量需求，若 Userdefined 為 true 此處設定才有意義
+                type: integer
+                minimum: 0
+              PRBs:                                # 使用者自定該 cell 要分配多少 prb 數量需求，若 Userdefined 為 true 此處設定才有意義
+                type: integer
+                minimum: 0
+            required:
+            - UEs
+            - PRBs
+        required:
+        - NCI
+        - RateofPRB
+        - Userdefined
+        
+        if:
+          properties:
+            Userdefined:
+              const: true
+        then:
+          required:
+          - allocate
+  required: [cells]
+  
+
+ResourceMonitor:
+  type: object
+  properties:
+    UEthreshold:
+      type: number
+      minimum: 0
+    PRBthreshold:
+      type: number
+      minimum: 0         

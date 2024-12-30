@@ -1,0 +1,60 @@
+$id: 'resource:/json-schema/'
+
+type: object
+properties:
+  notificationId:
+    type: string   
+  notificationType:
+    type: string
+    enum: [notifyNewAlarm, notifyChangedAlarm, notifyClearedAlarm]
+  interface:
+    type: string
+    enum: [N1/N2, N3]
+  endPoint:
+    type: object
+    properties:
+      srcIp:
+        type: string
+        format: ipv4
+      srcMac:
+        $ref: 'common.yaml#/FormatMac'
+      dstIp:
+        type: string
+        format: ipv4
+      dstMac:
+        $ref: 'common.yaml#/FormatMac'
+#    required:
+#    - srcIp
+#    - dstIp
+  probableCause:
+    type: string
+    maxLength: 256
+  perceivedSeverity:
+    type: string
+    enum: [Critical, High, Medium, Low]
+  alarmId:
+    type: string
+    maxLength: 64
+  alarmTime:
+    type: string
+    format: date-time
+  additionalInformation:
+    type: object
+  detectionType:
+    type: string
+    enum: [DoS, BiddingDownAttacks, Sniffing, IpDepletion, Spoofing, Other, NetworkDos, EndpointDos, MITM, MITM_ARP, Expolits, Hijack, MecAttack, Tamper]  # 非駝峰命名，特例
+  proposedRepairActions:
+    type: string
+    maxLength: 1024
+  SeverityNumber:  # 開頭是大寫，特例
+    type: number
+    minimum: 0
+    maximum: 10  
+required:
+# - notificationId
+- alarmId
+- alarmTime
+- perceivedSeverity
+- interface
+- detectionType
+# - endPoint

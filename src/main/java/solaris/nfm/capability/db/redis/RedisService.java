@@ -132,16 +132,16 @@ public class RedisService
 
 		// ---[ 設置連線參數 ]-----------------------------------------------------------------------------------------------[S]
 		// final String mode = redisConfigNode.path("mode").asText();
-		final String password = redisConfigNode.path("password").asText();
+		final String pwpwpwpw = redisConfigNode.path("password").asText();
 		final Integer database = redisConfigNode.path("database").asInt();
 		// ---[ 設置連線參數 ]-----------------------------------------------------------------------------------------------[E]
 
 		if ((redisConfigNode.get("master") != null && StringUtils.hasText(redisConfigNode.path("master").asText()))
 				&& (redisConfigNode.get("nodes") != null && StringUtils.hasText(redisConfigNode.path("nodes").asText())) && (database != null && database > -1)
-				&& (password != null && StringUtils.hasText(password)))
+				&& (pwpwpwpw != null && StringUtils.hasText(pwpwpwpw)))
 			configMode = RedisConfigMode.Sentinel;
 		if ((redisConfigNode.get("host") != null && StringUtils.hasText(redisConfigNode.path("host").asText())) && (redisConfigNode.get("port") != null && redisConfigNode.path("port").asInt() > 0)
-				&& (database != null && database > -1) && (password != null && StringUtils.hasText(password)))
+				&& (database != null && database > -1) && (pwpwpwpw != null && StringUtils.hasText(pwpwpwpw)))
 			configMode = RedisConfigMode.Standalone;
 
 		// 依據環境，配置相對應的 config
@@ -157,7 +157,7 @@ public class RedisService
 				standaloneConfig.setHostName(hostName);
 				standaloneConfig.setPort(port);
 				standaloneConfig.setDatabase(database);
-				if (!ObjectUtils.isEmpty(password)) standaloneConfig.setPassword(RedisPassword.of(password));
+				if (!ObjectUtils.isEmpty(pwpwpwpw)) standaloneConfig.setPassword(RedisPassword.of(pwpwpwpw));
 
 				redisConfig = standaloneConfig;
 				break;
@@ -172,7 +172,7 @@ public class RedisService
 				final Set<String> sentinelHostAndPorts = new HashSet<>(Arrays.asList(nodes.split(",")));
 				final RedisSentinelConfiguration sentinelConfig = new RedisSentinelConfiguration(master, sentinelHostAndPorts);
 				sentinelConfig.setDatabase(database);
-				if (!ObjectUtils.isEmpty(password)) sentinelConfig.setPassword(RedisPassword.of(password));
+				if (!ObjectUtils.isEmpty(pwpwpwpw)) sentinelConfig.setPassword(RedisPassword.of(pwpwpwpw));
 
 				redisConfig = sentinelConfig;
 				break;

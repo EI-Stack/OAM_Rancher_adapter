@@ -2,9 +2,9 @@ package solaris.nfm.model.base.domain;
 
 import java.io.Serializable;
 
-import javax.persistence.MappedSuperclass;
-
 import org.apache.commons.text.WordUtils;
+
+import jakarta.persistence.MappedSuperclass;
 
 @MappedSuperclass
 public abstract class EntityBase implements Serializable

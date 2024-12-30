@@ -3,18 +3,21 @@ package solaris.nfm.config.security.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.FilterInvocationSecurityMetadataSource;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.context.DelegatingSecurityContextRepository;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.RequestAttributeSecurityContextRepository;
 
 import solaris.nfm.config.security.NeoAccessDecisionManager;
 import solaris.nfm.config.security.bean.RoleHierarchyBean;
@@ -22,9 +25,9 @@ import solaris.nfm.config.security.domain.JwtAuthenticationEntryPoint;
 import solaris.nfm.config.security.filter.JwtTokenAuthenticationFilter;
 import solaris.nfm.config.security.util.RoleHierarchyUtil;
 
+@Configuration
 @EnableWebSecurity
-// @EnableGlobalMethodSecurity(prePostEnabled = true)
-public class JwtWebSecurityConfig extends WebSecurityConfigurerAdapter
+public class JwtWebSecurityConfig
 {
 	@Autowired
 	private JwtTokenAuthenticationFilter	jwtTokenAuthenticationFilterFilter;
@@ -50,36 +53,39 @@ public class JwtWebSecurityConfig extends WebSecurityConfigurerAdapter
 	public void configureAuthentication(final AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception
 	{}
 
-	@Override
 	@Bean
-	public AuthenticationManager authenticationManager() throws Exception
+	protected SecurityFilterChain filterChain(final HttpSecurity httpSecurity) throws Exception
 	{
-		return super.authenticationManagerBean();
-	}
+		// httpSecurity.requiresChannel(channel -> channel.anyRequest().requiresSecure());
 
-	@Override
-	protected void configure(final HttpSecurity httpSecurity) throws Exception
-	{
 		// @formatter:off
 		httpSecurity
+		// 禁用 basic 明文驗證
+        .httpBasic().disable()
 		// 由於採用了 JWT，所以不需要 CSRF 功能
-		.csrf().disable()
+		.csrf().ignoringRequestMatchers("/v1/**").and()
 		// 支持跨域访问
 		.cors().and()
 		// 由於採用了 token，所以不需要 session，關閉不需要的功能以節省記憶體
 		.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-		.authorizeRequests()
+		.authorizeHttpRequests()
 		// .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+		// 讀取 json schema 不須驗證，直接放行 (本質上是讀取靜態文件資源，預設目錄是 /public, /static, /resources)
+		// .antMatchers("/static/**").hasAnyRole("GUEST")
 		// 讀取 swagger 不須驗證，直接放行
-		.antMatchers("/v2/api-docs", "/configuration/**", "/swagger-resources/**", "/configuration/security", "/swagger-ui.html", "/webjars/**").hasAnyRole("GUEST")
+		.requestMatchers("/v2/api-docs", "/configuration/**", "/swagger-resources/**", "/configuration/security", "/swagger-ui.html", "/webjars/**").hasAnyRole("GUEST")
 		// 讀取健康狀態不須驗證，直接放行 (但日後應該提高讀取權限)
-		.antMatchers("/actuator/**", "/webSocketServer/**","/ws/**").hasAnyRole("GUEST")
+		.requestMatchers("/actuator/**", "/webSocketServer/**","/ws/**").hasAnyRole("GUEST")
 		// 讀取 grafana webhook 不須驗證，直接放行
-		.antMatchers("/v1/webhook/**").hasAnyRole("GUEST")
+		.requestMatchers("/v1/webhook/**").hasAnyRole("GUEST")
 		// 讀取 Affirmed webhook 不須驗證，直接放行
-		.antMatchers("/hooks/Elastalert/**").hasAnyRole("GUEST")
-		.antMatchers(HttpMethod.POST, "/v1/statistics/**").hasAnyRole("LogManager")
+		.requestMatchers("/hooks/Elastalert/**").hasAnyRole("GUEST")
+		// 讀取資安稽核事件，不須驗證，直接放行
+		.requestMatchers("/v1/securityEvents/**").hasAnyRole("GUEST")
+		.requestMatchers(HttpMethod.POST, "/v1/statistics/**").hasAnyRole("LogManager")
 		.anyRequest().hasAnyRole("Portal");
+
+
 		/*
 		 * .withObjectPostProcessor(new ObjectPostProcessor<FilterSecurityInterceptor>() {
 		 * @Override
@@ -99,7 +105,19 @@ public class JwtWebSecurityConfig extends WebSecurityConfigurerAdapter
 		.frameOptions()
 		.sameOrigin()  // required to set for H2 else H2 Console will be blank.
 		.cacheControl();
+
+		// 這段是針對 Spring Security 6 所作的修正，為官網建議的預設值
+		httpSecurity
+		.securityContext(securityContext -> securityContext
+			.securityContextRepository(new DelegatingSecurityContextRepository(
+				new RequestAttributeSecurityContextRepository(),
+				new HttpSessionSecurityContextRepository()
+			))
+		)
+		.securityContext(securityContext -> securityContext.requireExplicitSave(true));
 		// @formatter:on
+
+		return httpSecurity.build();
 	}
 
 	// Spring Security 是通过 SecurityMetadataSource 来加载访问时所需要的具体权限

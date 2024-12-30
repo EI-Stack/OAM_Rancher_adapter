@@ -3,16 +3,16 @@ package solaris.nfm.util;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.ServletInputStream;
+import jakarta.servlet.http.HttpServletRequest;
 
 public class ByteUtil
 {
 	public static byte[] getHttpServletRequestBody(final HttpServletRequest request) throws IOException
 	{
-		ServletInputStream sis = request.getInputStream();
-		byte[] buffer = new byte[1024];
-		ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
+		final ServletInputStream sis = request.getInputStream();
+		final byte[] buffer = new byte[1024];
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
 		int bytesread = 0;
 		while (true)
 		{
@@ -26,8 +26,8 @@ public class ByteUtil
 	// Converting a string of hex character to bytes
 	public static byte[] hexStringToByteArray(final String s)
 	{
-		int len = s.length();
-		byte[] data = new byte[len / 2];
+		final int len = s.length();
+		final byte[] data = new byte[len / 2];
 		for (int i = 0; i < len; i += 2)
 		{
 			data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4) + Character.digit(s.charAt(i + 1), 16));
@@ -38,7 +38,7 @@ public class ByteUtil
 	// Converting a bytes array to string of hex character
 	public static String byteArrayToHexString(final byte[] b)
 	{
-		int len = b.length;
+		final int len = b.length;
 		String data = new String();
 		for (int i = 0; i < len; i++)
 		{
@@ -50,10 +50,10 @@ public class ByteUtil
 
 	public static String toHexString(final byte[] sourceByteArray)
 	{
-		StringBuilder hexString = new StringBuilder();
+		final StringBuilder hexString = new StringBuilder();
 		for (int i = 0; i < sourceByteArray.length; i++)
 		{
-			String hex = Integer.toHexString(0xFF & sourceByteArray[i]);
+			final String hex = Integer.toHexString(0xFF & sourceByteArray[i]);
 			if (hex.length() == 1)
 			{
 				hexString.append('0');
@@ -65,7 +65,7 @@ public class ByteUtil
 
 	public static String toBinaryString(final byte[] sourceByteArray)
 	{
-		StringBuilder binaryString = new StringBuilder();
+		final StringBuilder binaryString = new StringBuilder();
 		String tmpString = null;
 		for (int i = 0; i < sourceByteArray.length; i++)
 		{
@@ -108,7 +108,6 @@ public class ByteUtil
 
 	public static byte[] covertShortToByteArray(final short s)
 	{
-		return new byte[]
-				{(byte) ((s & 0xFF00) >> 8), (byte) (s & 0x00FF)};
+		return new byte[]{(byte) ((s & 0xFF00) >> 8), (byte) (s & 0x00FF)};
 	}
 }

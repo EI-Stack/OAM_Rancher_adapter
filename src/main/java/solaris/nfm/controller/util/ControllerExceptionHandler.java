@@ -7,9 +7,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -34,6 +31,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -112,7 +111,7 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler
 				cause = cause.getCause();
 			}
 			// ---[ EntityNotFoundException ]--------------------------------------------------------------------------[S]
-			if (rootCause instanceof EntityNotFoundException || rootCause instanceof javax.persistence.EntityNotFoundException)
+			if (rootCause instanceof EntityNotFoundException || rootCause instanceof jakarta.persistence.EntityNotFoundException)
 			{
 				final EntityNotFoundException exception = (EntityNotFoundException) rootCause;
 				response.setStatus(HttpStatus.NOT_FOUND.value());
@@ -131,7 +130,6 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler
 	/**
 	 * 通用的接口映射異常處理
 	 */
-	@Override
 	protected ResponseEntity<Object> handleExceptionInternal(final Exception ex, final Object body, final HttpHeaders headers, final HttpStatus status, final WebRequest request)
 	{
 		// 處理資料校驗異常：MethodArgumentNotValidException
@@ -142,8 +140,8 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler
 		{
 			ex.printStackTrace();
 			final MethodArgumentTypeMismatchException exception = (MethodArgumentTypeMismatchException) ex;
-			log.error("\t[CEH] 輸入參數的資料型別不正確。" + "\n 調用方法：" + exception.getParameter().getMethod().getName() + "\n 輸入参数名稱：" + exception.getName() + "\n 錯誤的参数值：" + exception.getValue() + "\n 錯誤訊息："
-					+ exception.getLocalizedMessage());
+			final String methodName = (exception.getParameter().getMethod() == null) ? "" : exception.getParameter().getMethod().getName();
+			log.error("\t[CEH] 輸入參數的資料型別不正確。" + "\n 調用方法：" + methodName + "\n 輸入参数名稱：" + exception.getName() + "\n 錯誤的参数值：" + exception.getValue() + "\n 錯誤訊息：" + exception.getLocalizedMessage());
 			final String messageString = "Convering the vaule (" + exception.getValue() + ") of input argument (" + exception.getName() + ") is failed, check using proper data type.";
 			return new ResponseEntity<>(new ControllerErrorResponseBean(status.value(), messageString), status);
 		}
@@ -216,7 +214,7 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler
 		final UnrecognizedPropertyException ex = (UnrecognizedPropertyException) mismatchedInputException;
 		final String exceptionName = ex.getClass().getSimpleName();
 		final String unrecognizedPropertyName = ex.getPropertyName();
-		final String knownPropertyNameCsv = ex.getKnownPropertyIds().stream().map(Object::toString).collect(Collectors.joining(", "));
+		final String knownPropertyNameCsv = (ex.getKnownPropertyIds() == null) ? "" : ex.getKnownPropertyIds().stream().map(Object::toString).collect(Collectors.joining(", "));
 		final String message = MessageFormat.format("Field ''{0}'' is unrecognized, allowed fields are [{1}].", unrecognizedPropertyName, knownPropertyNameCsv);
 
 		log.error("\t[CEH] [{}] Input Json cannot match to Dto. Message: {}", exceptionName, ex.getMessage());

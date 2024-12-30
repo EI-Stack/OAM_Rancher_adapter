@@ -1,7 +1,6 @@
 package solaris.nfm.model.base.domain;
 
-import javax.persistence.MappedSuperclass;
-
+import jakarta.persistence.MappedSuperclass;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

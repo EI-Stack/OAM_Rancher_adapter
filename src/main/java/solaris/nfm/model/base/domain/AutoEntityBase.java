@@ -1,10 +1,10 @@
 package solaris.nfm.model.base.domain;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Version;
+import jakarta.persistence.Basic;
+import jakarta.persistence.Column;
+import jakarta.persistence.Id;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Version;
 
 @MappedSuperclass
 public abstract class AutoEntityBase extends EntityBase
@@ -49,7 +49,7 @@ public abstract class AutoEntityBase extends EntityBase
 		if (this == object) return true;
 		if (object == null) return false;
 		if (getClass() != object.getClass()) return false;
-		AutoEntityBase other = (AutoEntityBase) object;
+		final AutoEntityBase other = (AutoEntityBase) object;
 		if (this.getId() != other.getId() && (this.getId() == null || !this.id.equals(other.id)))
 		{
 			return false;
@@ -63,9 +63,9 @@ public abstract class AutoEntityBase extends EntityBase
 		return this.getClass().getName() + "(ID: " + this.id + ")";
 	}
 
-	//	@Override
-	//	public String getHumanReadableEntityName()
-	//	{
-	//		return WordUtils.uncapitalize(this.getClass().getSimpleName().replaceAll("(\\p{Ll})(\\p{Lu})", "$1 $2"), ' ');
-	//	}
+	// @Override
+	// public String getHumanReadableEntityName()
+	// {
+	// return WordUtils.uncapitalize(this.getClass().getSimpleName().replaceAll("(\\p{Ll})(\\p{Lu})", "$1 $2"), ' ');
+	// }
 }

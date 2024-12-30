@@ -1,14 +1,14 @@
 performance-rule-name:
   name-list: 
     fgc:
-      - pps-n3-ul
-      - pps-n3-dl
-      - pps-n6-ul
-      - pps-n6-dl
-      - throughput-n3-ul
-      - throughput-n3-dl
-      - throughput-n6-ul
-      - throughput-n6-dl    
+      - pps-N3-ul
+      - pps-N3-dl
+      - pps-N6-ul
+      - pps-N6-dl
+      - throughput-N3-ul
+      - throughput-N3-dl
+      - throughput-N6-ul
+      - throughput-N6-dl    
     mec:
       - throughput-n3-ul
       - throughput-n3-dl

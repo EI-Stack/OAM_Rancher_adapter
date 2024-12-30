@@ -1,0 +1,84 @@
+$id: 'resource:/json-schema/R16/'
+
+type: object
+properties:
+  networkType:
+    type: string
+    enum: [fgc, mec, ric, physical]
+  alarmId:
+    $ref: 'TS28532_FaultMnS.yaml#/components/schemas/AlarmId'
+  alarmType:
+    $ref: 'TS28532_FaultMnS.yaml#/components/schemas/AlarmType'
+  probableCause:
+    $ref: 'TS28532_FaultMnS.yaml#/components/schemas/ProbableCause'
+  perceivedSeverity:
+    $ref: 'TS28532_FaultMnS.yaml#/components/schemas/PerceivedSeverity'
+  alarmTime:
+    type: string
+    format: date-time
+  proposedRepairActions:
+    type: string
+    maxLength: 1024
+  additionalText:
+    type: string
+    maxLength: 256
+#  additionalInformation:
+#    $ref: 'TS28623_ComDefs.yaml#/components/schemas/AttributeNameValuePairSet'
+  alarmErrorCode:
+    type: string
+    maxLength: 64
+  additional:
+    type: object
+required:
+- networkType
+- alarmId
+- alarmType
+- probableCause
+- perceivedSeverity
+- alarmTime
+
+allOf:
+  - if:
+      properties:
+        networkType:
+          const: mec
+    then:
+      required:
+      - additionalInformation
+      properties:
+        additionalInformation:
+          type: object
+          properties:
+            regionId:
+              type: string
+              maxLength: 50
+            appId:
+              type: string
+              maxLength: 32
+            appIp:
+              type: string
+              format: ipv4 
+          required:
+          - regionId
+          - appId
+          - appIp
+  - if:
+      properties:
+        networkType:
+          const: ric
+    then:
+      required:
+      - additionalInformation
+      properties:
+        additionalInformation:
+          type: object
+          properties:
+            fieldId:
+              type: string
+              maxLength: 50
+            nci:
+              type: string
+              maxLength: 50
+          required:
+          - fieldId
+          - nci

@@ -13,14 +13,13 @@ management:
       # base-path: /po
       exposure:
         # 大多數 actuator 的端口都不會通過 http 公開，* 代表公開所有這些端点。对於營運環境，應該仔细選擇要公開的端點。
-        include: health, info
+        include: health, info, env, metrics
   metrics:
     tags:
       application: ${spring.application.name}        
   endpoint:
     shutdown.enabled: false  # 遠端關機，正式營運須關閉此功能
-    health: 
-      show-details: ALWAYS  # 預設值是 never， ALWAYS | NEVER | WHEN_AUTHORIZED
+    health.show-details: ALWAYS  # 預設值是 never， ALWAYS | NEVER | WHEN_AUTHORIZED
   health:
     defaults.enabled: true
     mail.enabled: false
@@ -28,10 +27,12 @@ management:
     build.enabled: true
     defaults.enabled: true
     env.enabled: true
-    git.enabled: true    
+    git.enabled: true
+    java.enabled: true      # 顯示 JAVA 執行環境資訊 
   #====================================================================================================================#
   # Actuator - 配置自定義系統訊息，使用 /actuator/info 方式讀取
   #====================================================================================================================#
-    app:
-      name: Edge Cloud Backend
-      version: 2.3.31.3
+info:
+  app:
+    name: NFM (Network Function Manager)
+    version: 1.12.30.1

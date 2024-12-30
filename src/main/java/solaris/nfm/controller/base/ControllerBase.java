@@ -10,11 +10,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.servlet.http.HttpServletRequest;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -33,8 +28,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.querydsl.core.types.Predicate;
-import com.querydsl.jpa.impl.JPAQueryFactory;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.servlet.http.HttpServletRequest;
 import solaris.nfm.controller.dto.CountResultDto;
 import solaris.nfm.controller.dto.MethodResultDto;
 import solaris.nfm.controller.dto.PaginationDto;
@@ -71,12 +69,11 @@ public abstract class ControllerBase<E extends EntityBase, BEAN, DCO, DUO, DMO>
 	protected HttpServletRequest	httpServletRequest;
 	@Autowired
 	protected ObjectMapper			objectMapper;
-	protected JPAQueryFactory		queryFactory;
 
 	@PostConstruct
 	public void init()
 	{
-		this.queryFactory = new JPAQueryFactory(this.entityManager);
+		// this.queryFactory = new JPAQueryFactory(this.entityManager);
 	}
 
 	@SuppressWarnings("unchecked")

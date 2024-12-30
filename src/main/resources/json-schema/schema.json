@@ -1,0 +1,41 @@
+{
+    "id": "http://json-schema.org/draft-04/schema#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["shouldBeString"],
+    "propertyNames": {
+    	"pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+  	},	
+    "properties": {
+        "shouldBeString" : {
+            "type": "string"
+        },
+        "shouldBeNumber": {
+            "type": "number"
+        },
+        "shouldBeGreater5": {
+            "type": "number",
+            "minimum" : 5
+        },
+        "shouldBeLess5": {
+            "type": "number",
+            "maximum" : 5
+        },
+        "shouldBeObject": {
+            "type": "object"
+        },
+        "shouldBeArray": {
+            "type": "array"
+        },
+        "shouldBeBoolean": {
+            "type": "boolean"
+        },
+        "shouldBeNull": {
+            "type": "null"
+        },
+        "shouldBeReg": {
+            "type": "string",
+            "pattern": "^(\\([0-9]{3}\\))?[0-9]{3}-[0-9]{4}$"
+        }
+    }
+}

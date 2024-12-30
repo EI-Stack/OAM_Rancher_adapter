@@ -5,9 +5,6 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -26,6 +23,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import solaris.nfm.capability.message.amqp.AmqpService;
 import solaris.nfm.capability.system.aop.dto.ApiLogDto;
@@ -53,8 +52,8 @@ public class SystemLogAop
 	 * 需要處理的方法清單 (白名單)，原則是處理所有的 Controller
 	 */
 	// @formatter:off
-	@Pointcut("execution(* solaris.nfm.model.resource.appgroup.AppGroupCtr.*(..))"
-			+ "|| execution(* solaris.nfm.model.resource.appgroup.AppGroupCtr.*(..))")
+	@Pointcut("execution(* solaris.nfm.model.resource.mecapppackage.MecAppPackageCtr.*(..))"
+			+ "|| execution(* solaris.nfm.controller.MecCtr.*(..))")
 	// @formatter:on
 	private void includedMethods()
 	{}
@@ -63,7 +62,7 @@ public class SystemLogAop
 	 * 不需要送出日誌的方法 (黑名單)
 	 * 注意！ 入參不能為空字串或是 null，只能寫不存在的 method
 	 */
-	@Pointcut("execution(* solaris.nfm.model.resource.appgroup.AppGroupCtr.aa*(..))")
+	@Pointcut("execution(* solaris.nfm.model.resource.alarm.mapping.FaultErrorMessage.aa*(..))")
 	public void excludedMethods()
 	{}
 
@@ -113,6 +112,7 @@ public class SystemLogAop
 		// log.debug("={}, ={}", jwtUser.getId(), jwtUser.getUsername());
 		apiLogDto.setUserId(jwtUser.getId());
 		apiLogDto.setUsername(jwtUser.getUsername());
+		apiLogDto.setUserIp(jwtUser.getUserIp());
 		apiLogDto.setApiType(ApiLogDto.ApiType.SystemLog);
 		apiLogDto.setOperationName(operationName);
 		apiLogDto.setOperationTag(getOperationTag(joinPoint));
@@ -191,8 +191,8 @@ public class SystemLogAop
 			case "modifyFileServer" :
 				// 遮蔽密碼欄位
 				final ObjectNode operationInput = (ObjectNode) apiLogDto.getOperationInput();
-				final JsonNode password = operationInput.findValue("password");
-				if (password.isMissingNode() == false && password.isNull() == false) operationInput.put("password", password.asText().replaceAll(".", "*"));
+				final JsonNode pwpwpwpw = operationInput.findValue("password");
+				if (pwpwpwpw.isMissingNode() == false && pwpwpwpw.isNull() == false) operationInput.put("password", pwpwpwpw.asText().replaceAll(".", "*"));
 				break;
 			default :
 				break;
@@ -238,7 +238,7 @@ public class SystemLogAop
 			apiLogDto.setTargetId(jsonResult.path("id").asText());
 		}
 		apiLogDto.setIsSuccessful(true);
-		this.amqpService.sendMsgForOperation(apiLogDto);
+		this.amqpService.sendMsgForOperationLog(apiLogDto);
 		// ---[ 發送日誌 ]---------------------------------------------------------------------------------------------[E]
 	}
 
@@ -267,7 +267,7 @@ public class SystemLogAop
 		apiLogDto.setIsSuccessful(false);
 		apiLogDto.setOperationError(rootCauseMessage);
 		apiLogDto.setResponseStatusCode(ExceptionUtil.getHttpStatus(e).value());
-		this.amqpService.sendMsgForOperation(apiLogDto);
+		this.amqpService.sendMsgForOperationLog(apiLogDto);
 	}
 
 	/**

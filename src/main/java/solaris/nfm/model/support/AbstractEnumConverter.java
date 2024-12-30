@@ -1,6 +1,6 @@
 package solaris.nfm.model.support;
 
-import javax.persistence.AttributeConverter;
+import jakarta.persistence.AttributeConverter;
 
 /**
  * @param <ATTR>
@@ -37,9 +37,9 @@ public abstract class AbstractEnumConverter<ATTR extends Enum<ATTR> & JpaEnum<DB
 	{
 		if (dbColumnData == null) return null;
 
-		ATTR[] enums = clazz.getEnumConstants();
+		final ATTR[] enums = clazz.getEnumConstants();
 
-		for (ATTR e : enums)
+		for (final ATTR e : enums)
 		{
 			if (e.getCode().equals(dbColumnData)) return e;
 

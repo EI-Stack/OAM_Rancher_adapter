@@ -1,0 +1,17 @@
+$id: 'resource:/json-schema/R16/'
+
+type: object
+properties:
+  messageType:
+    type: string
+    enum: [FaultAlarm, FaultAlarmRaw, PerformanceAlarm, PerformanceMeasurementData, SecurityApmAlarm, SecurityDtmAlarm, InvalidJsonFormat]
+  messageTime:
+    type: string
+    format: date-time
+  content:
+    type: object
+    minProperties: 1
+required:
+- messageType
+- messageTime
+- content
