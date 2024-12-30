@@ -43,7 +43,7 @@ import solaris.nfm.util.DateTimeUtil;
 @Slf4j
 public class AppGroupService extends RestServiceBase
 {
-	@Value("${solaris.server.k8s.http.url}")
+//	@Value("${solaris.server.k8s.http.url}")
 	private String url;
 	
 	@Autowired

@@ -48,7 +48,6 @@ import solaris.nfm.model.resource.alarm.performance.rule.PerformanceRuleDao;
 import solaris.nfm.model.resource.alarm.performance.rule.PerformanceRuleDmo;
 import solaris.nfm.model.resource.systemparam.SystemParameter;
 import solaris.nfm.model.resource.systemparam.SystemParameterDao;
-import solaris.nfm.service.AlarmService;
 import solaris.nfm.util.DateTimeUtil;
 
 @Service
@@ -73,8 +72,8 @@ public class AmqpSubService
 	private SystemParameterDao	systemParameterDao;
 	@Autowired
 	private MailService			mailService;
-	@Autowired
-	private AlarmService		alarmService;
+//	@Autowired
+//	private AlarmService		alarmService;
 	@Autowired
 	private JsonValidationService	jsonValidationService;
 
@@ -105,29 +104,29 @@ public class AmqpSubService
 						networkType = NetworkType.valueOf(content.path("networkType").asText());
 						switch (networkType)
 						{
-							case fgc :
-								this.alarmService.handleFgcFm(content);
-								break;
-							case mec :
-								this.alarmService.handleMecFm(content);
-								break;
-							case ric :
-								this.alarmService.handleRicFm(content);
-								break;
-							case physical :
-								this.alarmService.handlePhysicalFm(content);
-								break;
+//							case fgc :
+//								this.alarmService.handleFgcFm(content);
+//								break;
+//							case mec :
+//								this.alarmService.handleMecFm(content);
+//								break;
+//							case ric :
+//								this.alarmService.handleRicFm(content);
+//								break;
+//							case physical :
+//								this.alarmService.handlePhysicalFm(content);
+//								break;
 							default :
 								log.error("\t[Message] Unknown networkType=[{}]", networkType);
 								break;
 						}
 						break;
-					case SecurityDtmAlarm :
-						this.alarmService.handleSmDtmAlarm(content);
-						break;
-					case SecurityApmAlarm :
-						this.alarmService.handleSmApmAlarm(content);
-						break;
+//					case SecurityDtmAlarm :
+//						this.alarmService.handleSmDtmAlarm(content);
+//						break;
+//					case SecurityApmAlarm :
+//						this.alarmService.handleSmApmAlarm(content);
+//						break;
 					case PerformanceMeasurementData :
 						networkType = NetworkType.valueOf(content.path("networkType").asText());
 						handlePmMeasurementData(content, networkType);

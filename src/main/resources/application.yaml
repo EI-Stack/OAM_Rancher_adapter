@@ -9,10 +9,7 @@ solaris:
     adapter:
       core:
         http:
-          # url: http://60.251.156.214:33094
-          # url: http://60.251.156.216:31092
           url: 60.251.156.213:33094
-          # url: http://60.251.156.216:31092
         ssl:
           enabled: false                 # 是否啟用安全傳輸通道
           bundle: http-client           # SSL Bundle 的名稱
@@ -149,8 +146,8 @@ spring:
   #====================================================================================================================#  
   datasource:    
     driver-class-name: org.postgresql.Driver
-    #url: jdbc:postgresql://localhost:5432/solaris
-    url: jdbc:postgresql://postgres-svc:5432/solaris?sslmode=verify-full&sslrootcert=${solaris.postgresql.root-cert-file-location}
+    url: jdbc:postgresql://60.251.156.216:35432/solaris
+    #url: jdbc:postgresql://60.251.156.216:35432/solaris?sslmode=verify-full&sslrootcert=${solaris.postgresql.root-cert-file-location}
     username: postgres
     #==================================================================================================================#
     # Connection Pool - Hikari
@@ -239,8 +236,8 @@ spring:
   # RabbitMQ 
   #====================================================================================================================#  
   rabbitmq:   
-    host: 60.251.156.213
-    port: 38772                               # AMQP 加密 port 5671    MQTT port 1883
+    host: 60.251.156.216
+    port: 33672                               # AMQP 加密 port 5671    MQTT port 1883
     virtual-host: /                           # dev 是測試專用 vhost
     username: admin
     connection-timeout: 1s          

@@ -52,8 +52,7 @@ public class SystemLogAop
 	 * 需要處理的方法清單 (白名單)，原則是處理所有的 Controller
 	 */
 	// @formatter:off
-	@Pointcut("execution(* solaris.nfm.model.resource.mecapppackage.MecAppPackageCtr.*(..))"
-			+ "|| execution(* solaris.nfm.controller.MecCtr.*(..))")
+	@Pointcut("execution(* solaris.nfm.controller.FgcCtr.*(..))")
 	// @formatter:on
 	private void includedMethods()
 	{}
